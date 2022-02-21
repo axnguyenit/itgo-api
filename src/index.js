@@ -13,7 +13,6 @@ dotenv.config();
 // Connect db
 db.connect();
 
-
 const app = express();
 app.use(cors());
 
@@ -21,9 +20,11 @@ app.use(cors());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({
-  extended: true
-}));
+app.use(
+	bodyParser.urlencoded({
+		extended: true,
+	})
+);
 
 // HTTP logger
 app.use(morgan('combined'));
@@ -31,5 +32,5 @@ app.use(morgan('combined'));
 routes(app);
 
 app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`);
-})
+	console.log(`Example app listening on port ${port}`);
+});
