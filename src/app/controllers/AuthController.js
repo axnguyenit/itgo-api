@@ -2,12 +2,11 @@ const { validationResult } = require('express-validator');
 const bcrypt = require('bcrypt');
 const JWT = require('jsonwebtoken');
 const User = require('../models/User');
-
-// const users = [];
+const Cart = require('../models/Cart');
 
 class AuthController {
-	// [POST] /auth/register
-	async register(req, res, next) {
+	// [POST] /api/auth/register
+	async register(req, res) {
 		const { firstName, lastName, email, password } = req.body;
 		const errors = validationResult(req);
 
@@ -21,15 +20,12 @@ class AuthController {
 		const user = await User.findOne({ email: email });
 
 		// Validate if user already exists
-
 		if (user) {
-			// 422 Unprocessable Entity: server understands the content type of the request entity
-			// 200 Ok: Gmail, Facebook, Amazon, Twitter are returning 200 for user already exists
 			return res.status(200).json({
 				errors: [
 					{
 						email: user.email,
-						message: 'The user already exists',
+						msg: 'The user already exists',
 					},
 				],
 			});
@@ -56,14 +52,17 @@ class AuthController {
 				expiresIn: '1h',
 			});
 
+			const cart = new Cart({ userId: newUser._id });
+			await cart.save();
+
 			res.json({
 				accessToken,
 			});
 		});
 	}
 
-	// [POST] /auth/login
-	async login(req, res, next) {
+	// [POST] /api/auth/login
+	async login(req, res) {
 		const { email, password } = req.body;
 		// Look for user email in the database
 		const user = await User.findOne({ email: email });
@@ -73,20 +72,20 @@ class AuthController {
 			return res.status(400).json({
 				errors: [
 					{
-						message: 'Invalid credentials',
+						msg: 'Invalid credentials',
 					},
 				],
 			});
 		}
 
 		// Compare hased password with user password to see if they are valid
-		let isMatch = await bcrypt.compareSync(password, user.password);
+		const isMatch = await bcrypt.compareSync(password, user.password);
 
 		if (!isMatch) {
 			return res.status(401).json({
 				errors: [
 					{
-						message: 'Email or password is invalid.',
+						msg: 'Email or password is invalid.',
 					},
 				],
 			});
@@ -110,10 +109,10 @@ class AuthController {
 					refreshToken,
 				})
 			)
-			.catch((err) => console.log(err));
+			.catch((err) => res.json(err));
 	}
 
-	async logout(req, res, next) {
+	async logout(req, res) {
 		const refreshToken = req.header('x-auth-token');
 
 		try {
@@ -123,13 +122,13 @@ class AuthController {
 					.then(() => {
 						res.sendStatus(200);
 					})
-					.catch((err) => console.log(err));
+					.catch((err) => res.json(err));
 			}
 		} catch (error) {
 			res.status(403).json({
 				errors: [
 					{
-						message: 'Invalid token',
+						msg: 'Invalid token',
 					},
 				],
 			});

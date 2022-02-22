@@ -1,20 +1,48 @@
 var mongoose = require('mongoose');
 
 const Schema = mongoose.Schema;
-// const ObjectId = Schema.ObjectId;
 
 const User = new Schema(
 	{
-		// id: ObjectId,
-		firstName: { type: String, required: true, trim: true },
-		lastName: { type: String, required: true, trim: true },
-		email: { type: String, required: true, unique: true, lowercase: true },
-		password: {
+		firstName: {
 			type: String,
 			required: true,
+			trim: true,
 		},
-		isAdmin: { type: Boolean, required: true, default: false },
-		refreshToken: { type: String },
+		lastName: {
+			type: String,
+			required: true,
+			trim: true,
+		},
+		email: {
+			type: String,
+			required: true,
+			unique: true,
+			lowercase: true,
+		},
+		password: {
+			type: String,
+
+			required: true,
+		},
+		emailVerified: {
+			type: Boolean,
+			required: true,
+			default: false,
+		},
+		isAdmin: {
+			type: Boolean,
+			required: true,
+			default: false,
+		},
+		isInstructor: {
+			type: Boolean,
+			required: true,
+			default: false,
+		},
+		refreshToken: {
+			type: String,
+		},
 	},
 	{
 		timestamps: true,
