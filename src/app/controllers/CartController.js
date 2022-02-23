@@ -7,7 +7,11 @@ class CartController {
 		const { userId } = req.params;
 		try {
 			const cart = await Cart.findOne({ userId });
-			res.json(cart);
+			if (!cart)
+				res.json({
+					msg: 'User ID is invalid.',
+				});
+			else res.json(cart);
 		} catch (error) {
 			res.json(error);
 		}

@@ -9,18 +9,6 @@ const Order = new Schema(
 			required: true,
 			trim: true,
 		},
-
-		isPaid: {
-			type: Boolean,
-			required: true,
-			default: false,
-		},
-
-		totalCost: {
-			type: Number,
-			default: 0,
-		},
-
 		items: {
 			type: Array,
 		},

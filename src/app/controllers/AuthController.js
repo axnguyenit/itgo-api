@@ -3,6 +3,7 @@ const bcrypt = require('bcrypt');
 const JWT = require('jsonwebtoken');
 const User = require('../models/User');
 const Cart = require('../models/Cart');
+const Order = require('../models/Order');
 
 class AuthController {
 	// [POST] /api/auth/register
@@ -54,6 +55,9 @@ class AuthController {
 
 			const cart = new Cart({ userId: newUser._id });
 			await cart.save();
+
+			const order = new Order({ userId: newUser._id });
+			await order.save();
 
 			res.json({
 				accessToken,

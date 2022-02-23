@@ -2,24 +2,55 @@ const { validationResult } = require('express-validator');
 const Order = require('../models/Order');
 
 class OrderController {
-	// [GET] --> Display a listing of the resource.
-	index(req, res, next) {
-		res.render('news');
+	// [GET] /api/orders/:userId --> Display the specified resource.
+	async show(req, res) {
+		const { userId } = req.params;
+		try {
+			const order = await Order.findOne({ userId });
+			if (!order)
+				res.json({
+					msg: 'User ID is invalid.',
+				});
+			else res.json(order);
+		} catch (error) {
+			res.json(error);
+		}
 	}
 
-	// [POST] --> Store a newly created resource in storage.
-	store(req, res, next) {}
+	// [PUT] /api/orders/:id --> Update the specified resource in storage.
+	async update(req, res) {
+		const { id } = req.params;
+		const { items } = req.body;
+		const errors = validationResult(req);
 
-	// [GET] --> Display the specified resource.
-	show(req, res, next) {
-		res.send('NEWS DETAILS');
+		if (!errors.isEmpty()) {
+			return res.status(400).json({
+				errors: errors.array(),
+			});
+		}
+
+		try {
+			const order = await Order.findById(id);
+			if (!order) return;
+
+			const enrolledCourse = items.find((item) => {
+				return order.items.find((item2) => Object.values(item).includes(item2.courseId));
+			});
+
+			if (enrolledCourse) {
+				res.json({
+					enrolledCourse,
+					msg: 'This course is enrolled',
+				});
+			} else {
+				const newItems = [...order.items, ...items];
+				await Order.updateOne({ _id: id }, { items: newItems });
+				res.json({ msg: 'Updated' });
+			}
+		} catch (error) {
+			res.json(error);
+		}
 	}
-
-	// [PUT] --> Update the specified resource in storage.
-	update(req, res, next) {}
-
-	// [DELETE]
-	destroy(req, res, next) {}
 }
 
 module.exports = new OrderController();
