@@ -1,10 +1,9 @@
-# ITGO - API
+# ITGO API
 
 # How to start Server
 
-- Create .env and fill env variables:
-  - MONGODB_URI
-  - ACCESS_TOKEN_SECRET
-  - REFRESH_TOKEN_SECRET
-- Install Dpendencies ( yarn )
-- Start Server ( yarn start )
+- Create .env ( cp .env.example .env ) and fill env variables
+- Install Dependencies ( yarn )
+- Start Server ( yarn start || yarn dev )
+
+# [ITGO UI](https://github.com/khanguyen01it/itgo-ui)
