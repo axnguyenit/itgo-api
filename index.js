@@ -3,9 +3,9 @@ const express = require('express');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
-
 const cors = require('cors');
 const dotenv = require('dotenv');
+const { engine } = require('express-handlebars');
 const bodyParser = require('body-parser');
 const db = require('./config/db');
 const routes = require('./routes');
@@ -15,6 +15,19 @@ dotenv.config();
 const app = express();
 app.use(cors());
 
+// view engine setup
+app.engine(
+	'hbs',
+	engine({
+		extname: '.hbs',
+		helpers: {
+			sum: (a, b) => a + b,
+		},
+	})
+);
+app.set('views', path.join(__dirname, 'resources', 'views'));
+app.set('view engine', 'hbs');
+
 app.use(logger('dev'));
 // HTTP logger
 // app.use(logger('combined'));
@@ -23,11 +36,8 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Connect db
+// connect db
 db.connect();
-
-// public dir
-app.use(express.static(path.join(__dirname, 'public')));
 
 // init router
 routes(app);
