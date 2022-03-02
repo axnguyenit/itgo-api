@@ -1,12 +1,12 @@
 const { check } = require('express-validator');
 
-const validateOrder = [
+const order = [
 	check('items', 'Items is not empty.').isArray(),
 	check('items', 'Items is require.').notEmpty(),
 ];
 
 const validator = {
-	validateOrder,
+	order,
 };
 
 module.exports = validator;

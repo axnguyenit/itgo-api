@@ -1,28 +1,26 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
-const Cart = new Schema(
+const Review = new Schema(
 	{
 		user: {
 			type: Schema.Types.ObjectId,
 			required: true,
 			ref: 'User',
 		},
-		totalCost: {
-			type: Number,
-			default: 0,
-			min: 0,
+		comment: {
+			type: String,
+			required: true,
 		},
-		items: [
-			{
-				type: Schema.Types.ObjectId,
-				ref: 'Course',
-			},
-		],
+		rating: {
+			type: Number,
+			required: true,
+			min: 1,
+		},
 	},
 	{
 		timestamps: true,
 	}
 );
 
-module.exports = mongoose.model('Cart', Cart);
+module.exports = mongoose.model('Review', Review);
