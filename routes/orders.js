@@ -5,6 +5,6 @@ const validator = require('../validator/orders');
 const authToken = require('../app/middleware/auth');
 
 router.get('/:userId', authToken, orderController.show);
-router.put('/:id', validator.validateOrder, authToken, orderController.update);
+router.put('/:id', authToken, validator.order, orderController.update);
 
 module.exports = router;

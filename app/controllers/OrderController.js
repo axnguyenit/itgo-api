@@ -2,27 +2,34 @@ const { validationResult } = require('express-validator');
 const Order = require('../models/Order');
 
 class OrderController {
-	// [GET] /api/orders/:userId --> Display the specified resource.
+	// [GET] /api/orders/:userId
 	async show(req, res) {
 		const { userId } = req.params;
 		try {
 			const order = await Order.findOne({ userId });
 			if (!order)
 				return res.json({
-					msg: 'User ID is invalid.',
+					success: false,
+					errors: [
+						{
+							msg: 'User ID is invalid.',
+						},
+					],
 				});
-			return res.json(order);
+			return res.json({ success: true, order });
 		} catch (error) {
-			return res.json(error);
+			console.log(error);
+			return res.status(500).json({ success: false, errors: [{ msg: 'Internal server error' }] });
 		}
 	}
 
-	// [PUT] /api/orders/:id --> Update the specified resource in storage.
+	// [PUT] /api/orders/:id
 	async update(req, res) {
 		const errors = validationResult(req);
 
 		if (!errors.isEmpty()) {
 			return res.status(400).json({
+				success: false,
 				errors: errors.array(),
 			});
 		}
@@ -41,13 +48,26 @@ class OrderController {
 			if (enrolledCourse)
 				return res.json({
 					enrolledCourse,
-					msg: 'This course is enrolled',
+					success: false,
+					errors: [
+						{
+							msg: 'This course is enrolled',
+						},
+					],
 				});
 			const newItems = [...order.items, ...items];
 			await Order.updateOne({ _id: id }, { items: newItems });
-			return res.json({ msg: 'Updated' });
+			return res.json({
+				success: true,
+				errors: [
+					{
+						msg: 'Updated',
+					},
+				],
+			});
 		} catch (error) {
-			return res.json(error);
+			console.log(error);
+			return res.status(500).json({ success: false, errors: [{ msg: 'Internal server error' }] });
 		}
 	}
 }
