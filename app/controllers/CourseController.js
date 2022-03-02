@@ -34,34 +34,35 @@ class CourseController {
 	async store(req, res) {
 		const errors = validationResult(req);
 
-		if (!errors.isEmpty()) {
+		if (!errors.isEmpty())
 			return res.status(400).json({
 				success: false,
 				errors: errors.array(),
 			});
-		}
 
-		const { name, price, priceSale, status, tags, overview, requirements, targetAudiences } =
-			req.body;
+		const {
+			author,
+			name,
+			price,
+			priceSale,
+			status,
+			tags,
+			overview,
+			requirements,
+			targetAudiences,
+		} = req.body;
 
 		try {
-			const review = new Review({
-				user: new mongoose.Types.ObjectId('621ef50a265a5b324c1dec77'),
-				comment: 'this is comment',
-				rating: 4.5,
-			});
-			await review.save();
-
 			const courseDetails = new CourseDetail({
 				overview,
 				requirements,
 				targetAudiences,
-				reviews: review._id,
+				reviews: [],
 			});
 			await courseDetails.save();
 
 			const course = new Course({
-				author: new mongoose.Types.ObjectId('621ef50a265a5b324c1dec77'),
+				author: new mongoose.Types.ObjectId(author),
 				name,
 				cover: 'img path',
 				price,
@@ -103,16 +104,17 @@ class CourseController {
 					},
 				});
 
+			//Course not found
 			if (!course)
 				return res.json({
 					success: false,
 					errors: [
 						{
-							msg: 'Course ID invalid.',
+							msg: 'Course not found',
 						},
 					],
 				});
-			// Get author before return course
+
 			return res.json({ success: true, course });
 		} catch (error) {
 			console.log(error);
@@ -124,14 +126,70 @@ class CourseController {
 	async update(req, res) {
 		const errors = validationResult(req);
 
-		if (!errors.isEmpty()) {
+		if (!errors.isEmpty())
 			return res.status(400).json({
 				success: false,
 				errors: errors.array(),
 			});
-		}
 
 		const { id } = req.params;
+		const { name, price, priceSale, status, tags, overview, requirements, targetAudiences } =
+			req.body;
+		try {
+			const course = await Course.findByIdAndUpdate(id, { name, price, priceSale, status, tags });
+			//Course not found
+			if (!course)
+				return res.json({
+					success: false,
+					errors: [
+						{
+							msg: 'Course not found',
+						},
+					],
+				});
+
+			await CourseDetail.findByIdAndUpdate(course.details, {
+				overview,
+				requirements,
+				targetAudiences,
+			});
+
+			return res.json({
+				success: true,
+				msg: 'Your course was updated successfully',
+			});
+		} catch (error) {
+			console.log(error);
+			return res.status(500).json({ success: false, errors: [{ msg: 'Internal server error' }] });
+		}
+	}
+
+	async destroy(req, res) {
+		const { id } = req.params;
+		try {
+			const course = await Course.findByIdAndDelete(id);
+
+			//Course not found
+			if (!course)
+				return res.status(401).json({
+					success: false,
+					errors: [
+						{
+							msg: 'Course not found',
+						},
+					],
+				});
+
+			const courseDetails = await CourseDetail.findByIdAndDelete(course.details);
+			courseDetails.reviews.map(async (review) => {
+				await Review.findByIdAndDelete(review);
+			});
+
+			return res.json({ success: true, msg: 'Your course was removed successfully' });
+		} catch (error) {
+			console.log(error);
+			return res.status(500).json({ success: false, errors: [{ msg: 'Internal server error' }] });
+		}
 	}
 }
 
