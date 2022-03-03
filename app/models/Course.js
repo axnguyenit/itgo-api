@@ -11,10 +11,12 @@ const Course = new Schema(
 		name: {
 			type: String,
 			required: true,
+			trim: true,
 		},
 		cover: {
 			type: String,
 			required: true,
+			trim: true,
 		},
 		// thumbnail: String,
 		price: {
@@ -28,10 +30,12 @@ const Course = new Schema(
 		status: {
 			type: String,
 			required: true,
+			trim: true,
 		},
 		tags: [
 			{
 				type: String,
+				trim: true,
 			},
 		],
 		details: {

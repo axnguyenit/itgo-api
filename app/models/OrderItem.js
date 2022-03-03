@@ -3,12 +3,16 @@ const Schema = mongoose.Schema;
 
 const Order = new Schema(
 	{
-		userId: {
+		orderId: {
 			type: String,
 			required: true,
 			trim: true,
 		},
-		total: {
+		course: {
+			type: Schema.Types.ObjectId,
+			ref: 'Course',
+		},
+		price: {
 			type: Number,
 			required: true,
 			min: 0,

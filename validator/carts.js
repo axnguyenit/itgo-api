@@ -1,13 +1,20 @@
 const { check } = require('express-validator');
 
-const cart = [
-	check('totalCost', 'Total cost is require.').notEmpty(),
-	check('items', 'Items is require.').isArray(),
-	check('items', 'Items is not empty.').notEmpty(),
+const cartUpdate = [
+	check('total', 'Total is required').notEmpty(),
+	check('total', 'Total must be a positive number').isFloat({ gt: 0 }),
+	check('cartItemId', 'Course item ID is required').notEmpty(),
+];
+
+const cartStore = [
+	check('total', 'Total is required').notEmpty(),
+	check('total', 'Total must be a positive number').isFloat({ gt: 0 }),
+	check('courseId', 'Course ID is required').notEmpty(),
 ];
 
 const validator = {
-	cart,
+	cartUpdate,
+	cartStore,
 };
 
 module.exports = validator;

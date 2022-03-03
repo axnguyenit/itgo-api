@@ -25,12 +25,14 @@
     "express": "~4.16.1",
     "express-handlebars": "^6.0.2",
     "express-validator": "^6.14.0",
+    "helmet": "^5.0.2",
     "http-errors": "~1.6.3",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^6.2.3",
     "morgan": "~1.9.1",
     "socket.io": "^4.4.1",
-    "uuid": "^8.3.2"
+    "swagger-jsdoc": "^6.1.0",
+    "swagger-ui-express": "^4.3.0"
   },
   "devDependencies": {
     "nodemon": "^2.0.15"
