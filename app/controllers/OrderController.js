@@ -1,7 +1,7 @@
 const { validationResult } = require('express-validator');
 const Order = require('../models/Order');
 
-class OrderController {
+const OrderController = {
 	// [GET] /api/orders/:userId
 	async show(req, res) {
 		const { userId } = req.params;
@@ -21,7 +21,7 @@ class OrderController {
 			console.log(error);
 			return res.status(500).json({ success: false, errors: [{ msg: 'Internal server error' }] });
 		}
-	}
+	},
 
 	// [PUT] /api/orders/:id
 	async update(req, res) {
@@ -69,7 +69,7 @@ class OrderController {
 			console.log(error);
 			return res.status(500).json({ success: false, errors: [{ msg: 'Internal server error' }] });
 		}
-	}
-}
+	},
+};
 
-module.exports = new OrderController();
+module.exports = OrderController;

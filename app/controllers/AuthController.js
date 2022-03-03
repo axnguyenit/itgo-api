@@ -2,10 +2,8 @@ const { validationResult } = require('express-validator');
 const bcrypt = require('bcrypt');
 const JWT = require('jsonwebtoken');
 const User = require('../models/User');
-const Cart = require('../models/Cart');
-const Order = require('../models/Order');
 
-class AuthController {
+const AuthController = {
 	// [POST] /api/auth/register
 	async register(req, res) {
 		const errors = validationResult(req);
@@ -50,12 +48,15 @@ class AuthController {
 			const newUser = new User(data);
 			await newUser.save();
 
-			const cart = new Cart({ user: newUser._id });
-			await cart.save();
+			const { _id, firstName, lastName, isAdmin, isInstructor } = newUser;
 			// Do not include sensitive information in JWT
-			const accessToken = await JWT.sign({ email }, process.env.ACCESS_TOKEN_SECRET, {
-				expiresIn: '1h',
-			});
+			const accessToken = await JWT.sign(
+				{ _id, firstName, lastName, email, isAdmin, isInstructor },
+				process.env.ACCESS_TOKEN_SECRET,
+				{
+					expiresIn: '1h',
+				}
+			);
 
 			// const order = new Order({ userId: newUser._id });
 			// await order.save();
@@ -68,72 +69,85 @@ class AuthController {
 			console.log(error);
 			return res.status(500).json({ success: false, errors: [{ msg: 'Internal server error' }] });
 		}
-	}
+	},
 
 	// [POST] /api/auth/login
 	async login(req, res) {
 		const errors = validationResult(req);
 		// Validate user input
-		if (!errors.isEmpty()) {
+		if (!errors.isEmpty())
 			return res.status(400).json({
 				success: false,
 				errors: errors.array(),
 			});
-		}
 
-		const { email, password } = req.body;
-		// Look for user email in the database
-		const user = await User.findOne({ email: email });
+		try {
+			const { email, password } = req.body;
+			const user = await User.findOne({ email: email });
 
-		// If user not found, send error message
-		if (!user) {
-			return res.status(400).json({
-				success: false,
-				errors: [
-					{
-						msg: 'Invalid credentials',
-					},
-				],
-			});
-		}
+			// user not found
+			if (!user)
+				return res.status(400).json({
+					success: false,
+					errors: [
+						{
+							msg: 'Invalid credentials',
+						},
+					],
+				});
 
-		// Compare hased password with user password to see if they are valid
-		const isMatch = await bcrypt.compareSync(password, user.password);
+			// Compare hased password with user password to see if they are valid
+			const isMatch = await bcrypt.compareSync(password, user.password);
 
-		if (!isMatch) {
-			return res.status(401).json({
-				success: false,
-				errors: [
-					{
-						msg: 'Email or password is invalid.',
-					},
-				],
-			});
-		}
+			if (!isMatch)
+				return res.status(401).json({
+					success: false,
+					errors: [
+						{
+							msg: 'Email or password is invalid.',
+						},
+					],
+				});
 
-		// Send JWT access token
-		const accessToken = await JWT.sign({ email }, process.env.ACCESS_TOKEN_SECRET, {
-			expiresIn: '1h',
-		});
+			const { _id, firstName, lastName, isAdmin, isInstructor } = user;
 
-		// Refresh token
-		const refreshToken = await JWT.sign({ email }, process.env.REFRESH_TOKEN_SECRET, {
-			expiresIn: '3d',
-		});
-
-		// Set refersh token in refreshTokens array
-		User.updateOne({ email: user.email }, { refreshToken: refreshToken })
-			.then(() =>
-				res.json({
-					success: true,
-					accessToken,
-					refreshToken,
-				})
-			)
-			.catch((error) =>
-				res.status(500).json({ success: false, errors: [{ msg: 'Internal server error' }] })
+			// Send JWT access token
+			const accessToken = await JWT.sign(
+				{ _id, firstName, lastName, email, isAdmin, isInstructor },
+				process.env.ACCESS_TOKEN_SECRET,
+				{
+					expiresIn: '1h',
+				}
 			);
-	}
+
+			// Refresh token
+			// const refreshToken = await JWT.sign({ email }, process.env.REFRESH_TOKEN_SECRET, {
+			// 	expiresIn: '3d',
+			// });
+
+			return res.json({
+				success: true,
+				accessToken,
+				// refreshToken,
+			});
+
+			// Set refersh token in refreshTokens array
+			// User.updateOne({ email: user.email }, { refreshToken: refreshToken })
+			// 	.then(() =>
+			// 		res.json({
+			// 			success: true,
+			// 			accessToken,
+			// 			refreshToken,
+			// 		})
+			// 	)
+			// 	.catch((error) =>
+			// 		res.status(500).json({ success: false, errors: [{ msg: 'Internal server error' }] })
+			// 	);
+		} catch (error) {
+			console.log(error);
+			return res.status(500).json({ success: false, errors: [{ msg: 'Internal server error' }] });
+		}
+	},
 
 	// async logout(req, res) {
 	// 	const refreshToken = req.header('x-auth-token');
@@ -157,6 +171,6 @@ class AuthController {
 	// 		});
 	// 	}
 	// }
-}
+};
 
-module.exports = new AuthController();
+module.exports = AuthController;

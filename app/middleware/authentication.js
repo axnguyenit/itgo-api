@@ -1,6 +1,6 @@
 const JWT = require('jsonwebtoken');
 
-const authToken = async (req, res, next) => {
+const verifyToken = async (req, res, next) => {
 	const token = req.header('x-auth-token');
 
 	// If token not found, send error message
@@ -17,7 +17,7 @@ const authToken = async (req, res, next) => {
 		// Authenticate token
 		try {
 			const user = await JWT.verify(token, process.env.ACCESS_TOKEN_SECRET);
-			req.user = user.email;
+			req.user = user;
 			next();
 		} catch (error) {
 			return res.status(403).json({
@@ -32,4 +32,4 @@ const authToken = async (req, res, next) => {
 	}
 };
 
-module.exports = authToken;
+module.exports = verifyToken;

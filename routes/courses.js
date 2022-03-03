@@ -2,11 +2,25 @@ const express = require('express');
 const router = express.Router();
 const courseController = require('../app/controllers/CourseController');
 const validator = require('../validator/courses');
+const verifyToken = require('../app/middleware/authentication');
+const authorization = require('../app/middleware/authorization');
 
 router.get('/:id', courseController.show);
-router.put('/:id', validator.courseUpdate, courseController.update);
-router.delete('/:id', courseController.destroy);
-router.post('/', validator.courseStore, courseController.store);
+router.put(
+	'/:id',
+	verifyToken,
+	authorization.canUpdateCourse,
+	validator.courseUpdate,
+	courseController.update
+);
+router.delete('/:id', verifyToken, authorization.canUpdateCourse, courseController.destroy);
+router.post(
+	'/',
+	verifyToken,
+	authorization.canCreateCourse,
+	validator.courseStore,
+	courseController.store
+);
 router.get('/', courseController.index);
 
 module.exports = router;
