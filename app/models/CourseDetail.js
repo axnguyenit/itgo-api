@@ -6,14 +6,17 @@ const CourseDetail = new Schema(
 		overview: {
 			type: String,
 			required: true,
+			trim: true,
 		},
 		requirements: {
 			type: String,
 			required: true,
+			trim: true,
 		},
 		targetAudiences: {
 			type: String,
 			required: true,
+			trim: true,
 		},
 		reviews: [
 			{

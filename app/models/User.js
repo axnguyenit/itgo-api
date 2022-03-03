@@ -18,11 +18,12 @@ const User = new Schema(
 			required: true,
 			unique: true,
 			lowercase: true,
+			trim: true,
 		},
 		password: {
 			type: String,
-
 			required: true,
+			trim: true,
 		},
 		emailVerified: {
 			type: Boolean,
@@ -41,6 +42,7 @@ const User = new Schema(
 		},
 		refreshToken: {
 			type: String,
+			trim: true,
 		},
 	},
 	{

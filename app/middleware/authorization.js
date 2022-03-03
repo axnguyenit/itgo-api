@@ -1,5 +1,6 @@
 const Course = require('../models/Course');
 const User = require('../models/User');
+const Cart = require('../models/Cart');
 
 const authorization = {
 	// only admin & author can update, delete course
@@ -23,7 +24,7 @@ const authorization = {
 					],
 				});
 
-			const isAuthor = _id == course.author;
+			const isAuthor = _id === course.author;
 			if (!isAuthor && !isAdmin)
 				return res.status(403).json({
 					success: false,
@@ -48,6 +49,38 @@ const authorization = {
 		} = req;
 
 		if (!isAdmin && !isInstructor)
+			return res.status(403).json({
+				success: false,
+				errors: [
+					{
+						msg: 'Permission denied',
+					},
+				],
+			});
+
+		next();
+	},
+
+	// only author can update cart
+	async canUpdateCart(req, res, next) {
+		const {
+			user: { _id },
+		} = req;
+		const { id } = req.params;
+
+		const cart = await Cart.findById(id);
+		if (!cart)
+			return res.json({
+				success: false,
+				errors: [
+					{
+						msg: 'Cart not found',
+					},
+				],
+			});
+
+		const isAuthor = cart.userId === _id;
+		if (!isAuthor)
 			return res.status(403).json({
 				success: false,
 				errors: [

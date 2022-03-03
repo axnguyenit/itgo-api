@@ -4,15 +4,19 @@ const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const cors = require('cors');
+const helmet = require('helmet');
 const dotenv = require('dotenv');
 const { engine } = require('express-handlebars');
 const bodyParser = require('body-parser');
 const db = require('./config/db');
 const routes = require('./routes');
+// const swaggerUI = require('swagger-ui-express');
+// const swaggerJSDoc = require('swagger-jsdoc');
 
 dotenv.config();
 
 const app = express();
+app.use(helmet());
 app.use(cors());
 
 // view engine setup
@@ -38,6 +42,21 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // connect db
 db.connect();
+
+// Swagger configuration
+// const swaggerOptions = {
+// 	swaggerDefinition: {
+// 		openapi: '3.0.0',
+// 		info: {
+// 			title: 'ITGO API',
+// 			version: '1.0.0',
+// 		},
+// 	},
+// 	apis: ['./routes/*.js'],
+// };
+
+// const swaggerDocs = swaggerJSDoc(swaggerOptions);
+// app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerDocs));
 
 // init router
 routes(app);
