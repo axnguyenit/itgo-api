@@ -2,10 +2,9 @@ const { validationResult } = require('express-validator');
 const mongoose = require('mongoose');
 const Course = require('../models/Course');
 const CourseDetail = require('../models/CourseDetail');
-const User = require('../models/User');
 const Review = require('../models/Review');
 
-class CourseController {
+const courseController = {
 	// [GET] /api/courses
 	async index(req, res) {
 		try {
@@ -28,7 +27,7 @@ class CourseController {
 			console.log(error);
 			return res.status(500).json({ success: false, errors: [{ msg: 'Internal server error' }] });
 		}
-	}
+	},
 
 	// [POST] /api/courses
 	async store(req, res) {
@@ -78,7 +77,7 @@ class CourseController {
 			console.log(error);
 			return res.status(500).json({ success: false, errors: [{ msg: 'Internal server error' }] });
 		}
-	}
+	},
 
 	// [GET] /api/courses/:id
 	async show(req, res) {
@@ -104,7 +103,7 @@ class CourseController {
 					},
 				});
 
-			//Course not found
+			// course not found
 			if (!course)
 				return res.json({
 					success: false,
@@ -120,7 +119,7 @@ class CourseController {
 			console.log(error);
 			return res.status(500).json({ success: false, errors: [{ msg: 'Internal server error' }] });
 		}
-	}
+	},
 
 	// [PUT] /api/courses/:id
 	async update(req, res) {
@@ -137,7 +136,7 @@ class CourseController {
 			req.body;
 		try {
 			const course = await Course.findByIdAndUpdate(id, { name, price, priceSale, status, tags });
-			//Course not found
+			// course not found
 			if (!course)
 				return res.json({
 					success: false,
@@ -162,14 +161,15 @@ class CourseController {
 			console.log(error);
 			return res.status(500).json({ success: false, errors: [{ msg: 'Internal server error' }] });
 		}
-	}
+	},
 
+	// [DELETE] /api/course/:id
 	async destroy(req, res) {
 		const { id } = req.params;
 		try {
 			const course = await Course.findByIdAndDelete(id);
 
-			//Course not found
+			// course not found
 			if (!course)
 				return res.status(401).json({
 					success: false,
@@ -190,7 +190,7 @@ class CourseController {
 			console.log(error);
 			return res.status(500).json({ success: false, errors: [{ msg: 'Internal server error' }] });
 		}
-	}
-}
+	},
+};
 
-module.exports = new CourseController();
+module.exports = courseController;

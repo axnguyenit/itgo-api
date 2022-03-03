@@ -1,7 +1,7 @@
 const { validationResult } = require('express-validator');
 const Cart = require('../models/Cart');
 
-class CartController {
+const CartController = {
 	// [GET] /api/cart/:userId
 	async show(req, res) {
 		const { userId } = req.params;
@@ -29,7 +29,7 @@ class CartController {
 			console.log(error);
 			return res.status(500).json({ success: false, errors: [{ msg: 'Internal server error' }] });
 		}
-	}
+	},
 
 	// [PUT] /api/cart/:id
 	async update(req, res) {
@@ -54,7 +54,7 @@ class CartController {
 			console.log(error);
 			return res.status(500).json({ success: false, errors: [{ msg: 'Internal server error' }] });
 		}
-	}
-}
+	},
+};
 
-module.exports = new CartController();
+module.exports = CartController;

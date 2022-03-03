@@ -2,9 +2,9 @@ const express = require('express');
 const router = express.Router();
 const cartController = require('../app/controllers/CartController');
 const validator = require('../validator/carts');
-const authToken = require('../app/middleware/auth');
+const verifyToken = require('../app/middleware/authentication');
 
-router.get('/:userId', authToken, cartController.show);
-router.put('/:id', authToken, validator.cart, cartController.update);
+router.get('/:userId', verifyToken, cartController.show);
+router.put('/:id', verifyToken, validator.cart, cartController.update);
 
 module.exports = router;
