@@ -10,14 +10,15 @@ const { engine } = require('express-handlebars');
 const bodyParser = require('body-parser');
 const db = require('./config/db');
 const routes = require('./routes');
+const upload = require('./utils/upload');
+const verifyToken = require('./app/middleware/authentication');
+// const fs = require('fs');
 // const swaggerUI = require('swagger-ui-express');
 // const swaggerJSDoc = require('swagger-jsdoc');
 
 dotenv.config();
 
 const app = express();
-app.use(helmet());
-app.use(cors());
 
 // view engine setup
 app.engine(
@@ -32,13 +33,40 @@ app.engine(
 app.set('views', path.join(__dirname, 'resources', 'views'));
 app.set('view engine', 'hbs');
 
+app.use(helmet());
+app.use(cors());
 app.use(logger('dev'));
 // HTTP logger
 // app.use(logger('combined'));
-app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+
+// const images = ['1646463747461.png'];
+
+app.post('/api/upload', verifyToken, upload.single('image'), (req, res) => {
+	const file = req.file;
+	if (!file)
+		return res.status(400).json({
+			success: false,
+			errors: [
+				{
+					msg: 'Image not found',
+				},
+			],
+		});
+
+	// if (images && images.length > 0)
+	// 	images.map((image) => fs.unlinkSync(`public/uploads/courses/${image}`));
+
+	file.path = path.join(req.headers.host, 'assets', 'images', 'courses', file.filename);
+	// images = [file.filename];
+	return res.json({
+		success: true,
+		file,
+	});
+});
 
 // connect db
 db.connect();

@@ -3,7 +3,7 @@ const { Schema } = mongoose;
 
 const Course = new Schema(
 	{
-		author: {
+		instructor: {
 			type: Schema.Types.ObjectId,
 			required: true,
 			ref: 'user',
@@ -22,10 +22,12 @@ const Course = new Schema(
 		price: {
 			type: Number,
 			required: true,
+			min: 0,
 		},
 		priceSale: {
 			type: Number,
-			required: true,
+			min: 0,
+			default: 0,
 		},
 		status: {
 			type: String,

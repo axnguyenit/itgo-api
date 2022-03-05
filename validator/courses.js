@@ -1,15 +1,16 @@
 const { check } = require('express-validator');
 
 const courseStore = [
-	check('author', 'Author is required').notEmpty(),
+	check('instructor', 'Instructor is required').notEmpty(),
 	check('name', 'Course name must be at least 2 characters long').isLength({ min: 2 }),
-	// check('cover', 'Last name is require.').notEmpty(),
+	check('cover', 'Cover is require.').notEmpty(),
+	check('cover', 'Cover must be a string').isString(),
 	check('price', 'Price must be a positive number').isFloat({ gt: 0 }),
-	check('priceSale', 'Price sale must be a positive number').isFloat({ gt: 0 }),
+	check('priceSale', 'Price sale must be a positive number').isNumeric(),
 	check('status', 'Status must be a string of empty string or sale or new').isIn([
 		'sale',
 		'new',
-		'',
+		'default',
 	]),
 	check('tags', 'Tags is required').notEmpty(),
 	check('overview', 'Overview is required').notEmpty(),
@@ -22,7 +23,8 @@ const courseStore = [
 
 const courseUpdate = [
 	check('name', 'Course name must be at least 2 characters long').isLength({ min: 2 }),
-	// check('cover', 'Last name is require.').notEmpty(),
+	check('cover', 'Cover is require.').notEmpty(),
+	check('cover', 'Cover must be a string').isString(),
 	check('price', 'Price must be a positive number').isFloat({ gt: 0 }),
 	check('priceSale', 'Price sale must be a positive number').isFloat({ gt: 0 }),
 	check('status', 'Status must be a string of empty string or sale or new').isIn([

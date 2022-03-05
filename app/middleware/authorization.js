@@ -24,7 +24,7 @@ const authorization = {
 					],
 				});
 
-			const isAuthor = _id === course.author;
+			const isAuthor = _id === course.instructor;
 			if (!isAuthor && !isAdmin)
 				return res.status(403).json({
 					success: false,
