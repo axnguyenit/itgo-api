@@ -10,7 +10,7 @@ const courseController = {
 		try {
 			const courses = await Course.find()
 				.populate({
-					path: 'author',
+					path: 'instructor',
 					model: 'User',
 					select: 'email firstName lastName',
 				})
@@ -40,8 +40,9 @@ const courseController = {
 			});
 
 		const {
-			author,
+			instructor,
 			name,
+			cover,
 			price,
 			priceSale,
 			status,
@@ -61,9 +62,9 @@ const courseController = {
 			await courseDetails.save();
 
 			const course = new Course({
-				author: new mongoose.Types.ObjectId(author),
+				instructor: new mongoose.Types.ObjectId(instructor),
 				name,
-				cover: 'img path',
+				cover,
 				price,
 				priceSale,
 				status,
@@ -75,7 +76,7 @@ const courseController = {
 			return res.json({ success: true, msg: 'Your course was created successfully' });
 		} catch (error) {
 			console.log(error);
-			return res.status(500).json({ success: false, errors: [{ msg: 'Internal server error' }] });
+			return res.status(500).json({ success: false, errors: [{ msg: 'Internal server error 1' }] });
 		}
 	},
 
@@ -85,7 +86,7 @@ const courseController = {
 		try {
 			const course = await Course.findById(id)
 				.populate({
-					path: 'author',
+					path: 'instructor',
 					model: 'User',
 					select: 'email firstName lastName',
 				})
@@ -117,7 +118,7 @@ const courseController = {
 			return res.json({ success: true, course });
 		} catch (error) {
 			console.log(error);
-			return res.status(500).json({ success: false, errors: [{ msg: 'Internal server error' }] });
+			return res.status(500).json({ success: false, errors: [{ msg: 'Internal server error 2' }] });
 		}
 	},
 
