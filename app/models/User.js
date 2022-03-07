@@ -20,6 +20,11 @@ const User = new Schema(
 			lowercase: true,
 			trim: true,
 		},
+		// photoURL: {
+		// 	type: String,
+		// 	trim: true,
+		// 	default: '',
+		// },
 		password: {
 			type: String,
 			required: true,

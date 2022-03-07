@@ -1,9 +1,9 @@
 const JWT = require('jsonwebtoken');
 
 const verifyToken = async (req, res, next) => {
-	// const authHeader = req.headers["authorization"];
-	// const token = authHeader && authHeader.split(" ")[1]; // Bearer Token
-	const token = req.header('x-auth-token');
+	const authHeader = req.headers['authorization'];
+	const token = authHeader && authHeader.split(' ')[1]; // Bearer Token
+	// const token = req.header('x-auth-token');
 
 	// If token not found, send error message
 	if (!token) {

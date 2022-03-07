@@ -48,7 +48,7 @@ const AuthController = {
 			const newUser = new User(data);
 			await newUser.save();
 
-			const { _id, firstName, lastName, isAdmin, isInstructor } = newUser;
+			const { _id, firstName, lastName, isAdmin, isInstructor, emailVerified } = newUser;
 			// Do not include sensitive information in JWT
 			const accessToken = await JWT.sign(
 				{ _id, firstName, lastName, email, isAdmin, isInstructor },
@@ -63,6 +63,15 @@ const AuthController = {
 
 			return res.json({
 				success: true,
+				user: {
+					_id,
+					firstName,
+					lastName,
+					isAdmin,
+					isInstructor,
+					email,
+					emailVerified,
+				},
 				accessToken,
 			});
 		} catch (error) {
@@ -109,7 +118,7 @@ const AuthController = {
 					],
 				});
 
-			const { _id, firstName, lastName, isAdmin, isInstructor } = user;
+			const { _id, firstName, lastName, isAdmin, isInstructor, emailVerified } = user;
 
 			// Send JWT access token
 			const accessToken = await JWT.sign(
@@ -127,6 +136,15 @@ const AuthController = {
 
 			return res.json({
 				success: true,
+				user: {
+					_id,
+					firstName,
+					lastName,
+					isAdmin,
+					isInstructor,
+					email,
+					emailVerified,
+				},
 				accessToken,
 				// refreshToken,
 			});
@@ -143,6 +161,44 @@ const AuthController = {
 			// 	.catch((error) =>
 			// 		res.status(500).json({ success: false, errors: [{ msg: 'Internal server error' }] })
 			// 	);
+		} catch (error) {
+			console.log(error);
+			return res.status(500).json({ success: false, errors: [{ msg: 'Internal server error' }] });
+		}
+	},
+
+	async myAccount(req, res) {
+		const {
+			user: { _id },
+		} = req;
+		try {
+			const user = await User.findById(_id);
+
+			// user not found
+			if (!user)
+				return res.status(400).json({
+					success: false,
+					errors: [
+						{
+							msg: 'Invalid credentials',
+						},
+					],
+				});
+
+			const { firstName, lastName, email, isAdmin, isInstructor, emailVerified } = user;
+
+			return res.json({
+				success: true,
+				user: {
+					_id,
+					firstName,
+					lastName,
+					isAdmin,
+					isInstructor,
+					email,
+					emailVerified,
+				},
+			});
 		} catch (error) {
 			console.log(error);
 			return res.status(500).json({ success: false, errors: [{ msg: 'Internal server error' }] });
