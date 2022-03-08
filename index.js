@@ -33,8 +33,8 @@ app.engine(
 app.set('views', path.join(__dirname, 'resources', 'views'));
 app.set('view engine', 'hbs');
 
-app.use(helmet());
 app.use(cors());
+app.use(helmet.crossOriginResourcePolicy({ policy: 'cross-origin' }));
 app.use(logger('dev'));
 // HTTP logger
 // app.use(logger('combined'));
@@ -45,7 +45,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // const images = ['1646463747461.png'];
 
-app.post('/api/upload', verifyToken, upload.single('image'), (req, res) => {
+app.post('/api/upload/course-image', verifyToken, upload.single('image'), (req, res) => {
 	const file = req.file;
 	if (!file)
 		return res.status(400).json({
@@ -60,7 +60,15 @@ app.post('/api/upload', verifyToken, upload.single('image'), (req, res) => {
 	// if (images && images.length > 0)
 	// 	images.map((image) => fs.unlinkSync(`public/uploads/courses/${image}`));
 
-	file.path = path.join(req.headers.host, 'assets', 'images', 'courses', file.filename);
+	file.path = `${req.protocol}://${path.join(
+		req.headers.host,
+		'assets',
+		'images',
+		'courses',
+		file.filename
+	)}`;
+
+	console.log(file);
 	// images = [file.filename];
 	return res.json({
 		success: true,

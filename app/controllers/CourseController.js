@@ -156,10 +156,28 @@ const courseController = {
 			});
 
 		const { id } = req.params;
-		const { name, price, priceSale, status, tags, overview, requirements, targetAudiences } =
-			req.body;
+		const {
+			name,
+			instructor,
+			price,
+			cover,
+			priceSale,
+			status,
+			tags,
+			overview,
+			requirements,
+			targetAudiences,
+		} = req.body;
 		try {
-			const course = await Course.findByIdAndUpdate(id, { name, price, priceSale, status, tags });
+			const course = await Course.findByIdAndUpdate(id, {
+				name,
+				instructor,
+				price,
+				cover,
+				priceSale,
+				status,
+				tags,
+			});
 			// course not found
 			if (!course)
 				return res.json({

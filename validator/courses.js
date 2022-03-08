@@ -26,11 +26,11 @@ const courseUpdate = [
 	check('cover', 'Cover is require.').notEmpty(),
 	check('cover', 'Cover must be a string').isString(),
 	check('price', 'Price must be a positive number').isFloat({ gt: 0 }),
-	check('priceSale', 'Price sale must be a positive number').isFloat({ gt: 0 }),
+	check('priceSale', 'Price sale must be a positive number').isNumeric(),
 	check('status', 'Status must be a string of empty string or sale or new').isIn([
 		'sale',
 		'new',
-		'',
+		'default',
 	]),
 	check('tags', 'Tags is required').notEmpty(),
 	check('overview', 'Overview is required').notEmpty(),

@@ -26,3 +26,4 @@ yarn-error.log*
 .vscode
 /http
 /mock
+/public/assets/images/courses
