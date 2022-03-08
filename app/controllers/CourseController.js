@@ -4,24 +4,47 @@ const Course = require('../models/Course');
 const CourseDetail = require('../models/CourseDetail');
 const Review = require('../models/Review');
 
+// ----------------------------------------------------------------------
+
 const courseController = {
 	// [GET] /api/courses
 	async index(req, res) {
-		try {
-			const courses = await Course.find()
-				.populate({
+		const _totalRows = await Course.countDocuments();
+		let _page = parseInt(req.query._page);
+		let _limit = parseInt(req.query._limit);
+
+		if (_page) {
+			_page = _page >= 0 ? _page : 1;
+			_limit = _limit ? _limit : 1;
+			_limit = _limit >= 0 ? _limit : 1;
+			const skipDocs = (_page - 1) * _limit;
+
+			try {
+				const courses = await Course.find().limit(_limit).skip(skipDocs).populate({
 					path: 'instructor',
 					model: 'User',
 					select: 'email firstName lastName',
-				})
-				.populate({
-					path: 'details',
-					model: 'CourseDetail',
-					populate: {
-						path: 'reviews',
-						model: 'Review',
-					},
 				});
+
+				const pagination = {
+					_page,
+					_limit,
+					_totalRows,
+				};
+				return res.json({ success: true, courses, pagination });
+			} catch (error) {
+				console.log(error);
+				return res.status(500).json({ success: false, errors: [{ msg: 'Internal server error' }] });
+			}
+		}
+
+		// ==================================================================
+		try {
+			const courses = await Course.find().populate({
+				path: 'instructor',
+				model: 'User',
+				select: 'email firstName lastName',
+			});
 			return res.json({ success: true, courses });
 		} catch (error) {
 			console.log(error);
