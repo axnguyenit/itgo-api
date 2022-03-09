@@ -3,6 +3,9 @@ const mongoose = require('mongoose');
 const Course = require('../models/Course');
 const CourseDetail = require('../models/CourseDetail');
 const Review = require('../models/Review');
+const CartItem = require('../models/CartItem');
+const path = require('path');
+const fs = require('fs');
 
 // ----------------------------------------------------------------------
 
@@ -213,7 +216,7 @@ const courseController = {
 
 			// course not found
 			if (!course)
-				return res.status(401).json({
+				return res.status(404).json({
 					success: false,
 					errors: [
 						{
@@ -222,10 +225,15 @@ const courseController = {
 					],
 				});
 
+			const { base } = path.parse(course.cover);
+			fs.unlinkSync(path.join('public', 'assets', 'images', 'courses', base));
+
 			const courseDetails = await CourseDetail.findByIdAndDelete(course.details);
 			courseDetails.reviews.map(async (review) => {
 				await Review.findByIdAndDelete(review);
 			});
+
+			await CartItem.deleteMany({ course: course._id });
 
 			return res.json({ success: true, msg: 'Your course was removed successfully' });
 		} catch (error) {
