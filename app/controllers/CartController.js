@@ -24,7 +24,7 @@ const CartController = {
 			const course = await Course.findById(courseId);
 			// course not found
 			if (!course)
-				return res.json({
+				return res.status(404).json({
 					success: false,
 					errors: [
 						{
@@ -36,7 +36,7 @@ const CartController = {
 			const cartItem = await CartItem.findOne({ course: courseId });
 
 			if (cartItem)
-				return res.json({
+				return res.status(409).json({
 					success: false,
 					errors: [
 						{
@@ -50,13 +50,12 @@ const CartController = {
 		}
 
 		try {
-			const cart = await Cart.findOneAndUpdate({ userId: _id }, { total });
+			const cart = await Cart.findOne({ userId: _id });
 			// cart not found
 			let newCart = null;
 			if (!cart) {
 				newCart = new Cart({
 					userId: _id,
-					total,
 				});
 				await newCart.save();
 			}
@@ -67,7 +66,7 @@ const CartController = {
 			});
 			await cartItem.save();
 
-			return res.json({ success: true, msg: 'Add to cart successfully' });
+			return res.json({ success: true, cartItem, msg: 'Add to cart successfully' });
 		} catch (error) {
 			console.log(error);
 			return res.status(500).json({ success: false, errors: [{ msg: 'Internal server error' }] });
@@ -109,42 +108,15 @@ const CartController = {
 		}
 	},
 
-	async update(req, res) {
-		const { id } = req.params;
-		const { cartItemId, total } = req.body;
+	async removeItem(req, res) {
+		const { cartItemId } = req.params;
 
 		try {
-			// update cart total
-			const cart = await Cart.findByIdAndUpdate(id, { total });
-			if (!cart)
-				return res.json({
-					success: false,
-					errors: [
-						{
-							msg: 'Cart not found',
-						},
-					],
-				});
+			const cartItem = await CartItem.findByIdAndDelete(cartItemId);
 
-			// delete cart item
-			await CartItem.findOneAndDelete({ _id: cartItemId, cartId: id });
-
-			const cartItems = await CartItem.find({ cartId: id }).populate({
-				path: 'course',
-				model: 'Course',
-				select: 'name cover price priceSale',
-			});
-
-			console.log(cartItems.length);
-
-			if (cartItems.length === 0) {
-				await Cart.findByIdAndDelete(id);
-			}
-
-			return res.json({
-				success: true,
-				msg: 'Course was removed successfully',
-			});
+			if (!cartItem)
+				return res.status(404).json({ success: false, errors: [{ msg: 'Cart item not found' }] });
+			return res.json({ success: true, msg: 'Cart item was removed successfully' });
 		} catch (error) {
 			console.log(error);
 			return res.status(500).json({ success: false, errors: [{ msg: 'Internal server error' }] });

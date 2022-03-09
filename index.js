@@ -68,7 +68,6 @@ app.post('/api/upload/course-image', verifyToken, upload.single('image'), (req, 
 		file.filename
 	)}`;
 
-	console.log(file);
 	// images = [file.filename];
 	return res.json({
 		success: true,

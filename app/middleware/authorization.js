@@ -92,6 +92,10 @@ const authorization = {
 
 		next();
 	},
+
+	// async canRemoveCartItem(req, res, next) {
+
+	// }
 };
 
 module.exports = authorization;
