@@ -1,8 +1,11 @@
 const authRouter = require('./auth');
 const cartRouter = require('./carts');
 const orderRouter = require('./orders');
+const uploadRouter = require('./upload');
 const zoomRouter = require('./zoom');
 const courseRouter = require('./courses');
+const userRouter = require('./users');
+const instructorRouter = require('./instructors');
 
 const routes = (app) => {
 	app.use('/api/auth', authRouter);
@@ -10,13 +13,10 @@ const routes = (app) => {
 	app.use('/api/orders', orderRouter);
 	app.use('/api/zoom', zoomRouter);
 	app.use('/api/courses', courseRouter);
-	app.use('/', (req, res) => {
-		const info = {
-			repoApi: 'https://github.com/khanguyen01it/itgo-api',
-			repoUi: 'https://github.com/khanguyen01it/itgo-ui',
-		};
-		res.render('home', { info });
-	});
+	app.use('/api/users', userRouter);
+	app.use('/api/upload', uploadRouter);
+	app.use('/api/instructors', instructorRouter);
+	app.use('/', (req, res) => res.render('index'));
 };
 
 module.exports = routes;

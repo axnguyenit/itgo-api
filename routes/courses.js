@@ -10,7 +10,7 @@ router.put(
 	'/:id',
 	verifyToken,
 	authorization.canUpdateCourse,
-	validator.courseUpdate,
+	validator.course,
 	courseController.update
 );
 router.delete('/:id', verifyToken, authorization.canUpdateCourse, courseController.destroy);
@@ -18,7 +18,7 @@ router.post(
 	'/',
 	verifyToken,
 	authorization.canCreateCourse,
-	validator.courseStore,
+	validator.course,
 	courseController.store
 );
 router.get('/', courseController.index);

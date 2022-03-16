@@ -29,11 +29,11 @@ const Course = new Schema(
 			min: 0,
 			default: 0,
 		},
-		status: {
-			type: String,
-			required: true,
-			trim: true,
-		},
+		// status: {
+		// 	type: String,
+		// 	required: true,
+		// 	trim: true,
+		// },
 		tags: [
 			{
 				type: String,

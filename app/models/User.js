@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
+const { Schema } = mongoose;
 
 const User = new Schema(
 	{
@@ -20,11 +20,31 @@ const User = new Schema(
 			lowercase: true,
 			trim: true,
 		},
-		// photoURL: {
-		// 	type: String,
-		// 	trim: true,
-		// 	default: '',
-		// },
+		avatar: {
+			type: String,
+			trim: true,
+			default: '',
+		},
+		position: {
+			type: String,
+			trim: true,
+			default: '',
+		},
+		phoneNumber: {
+			type: String,
+			trim: true,
+			default: '',
+		},
+		address: {
+			type: String,
+			trim: true,
+			default: '',
+		},
+		region: {
+			type: String,
+			trim: true,
+			default: '',
+		},
 		password: {
 			type: String,
 			required: true,
@@ -43,6 +63,10 @@ const User = new Schema(
 		isInstructor: {
 			type: Boolean,
 			required: true,
+			default: false,
+		},
+		isBanned: {
+			type: Boolean,
 			default: false,
 		},
 		refreshToken: {

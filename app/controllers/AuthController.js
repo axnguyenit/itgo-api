@@ -18,14 +18,14 @@ const AuthController = {
 		const { firstName, lastName, email, password } = req.body;
 		const user = await User.findOne({ email: email });
 
-		// Validate if user already exists
+		// Validate if user already exist
 		if (user) {
-			return res.status(200).json({
+			return res.status(409).json({
 				success: false,
 				errors: [
 					{
 						email: user.email,
-						msg: 'The user already exists',
+						msg: 'The user already exist',
 					},
 				],
 			});
@@ -41,6 +41,10 @@ const AuthController = {
 			email,
 			password: hashedPassword,
 			refreshToken: '',
+			avatar: '',
+			address: '',
+			phoneNumber: '',
+			region: '',
 		};
 
 		// Save user info to database
@@ -48,7 +52,18 @@ const AuthController = {
 			const newUser = new User(data);
 			await newUser.save();
 
-			const { _id, firstName, lastName, isAdmin, isInstructor, emailVerified } = newUser;
+			const {
+				_id,
+				firstName,
+				lastName,
+				isAdmin,
+				isInstructor,
+				emailVerified,
+				avatar,
+				address,
+				phoneNumber,
+				region,
+			} = newUser;
 			// Do not include sensitive information in JWT
 			const accessToken = await JWT.sign(
 				{ _id, firstName, lastName, email, isAdmin, isInstructor },
@@ -71,6 +86,10 @@ const AuthController = {
 					isInstructor,
 					email,
 					emailVerified,
+					avatar,
+					address,
+					phoneNumber,
+					region,
 				},
 				accessToken,
 			});
@@ -96,11 +115,11 @@ const AuthController = {
 
 			// user not found
 			if (!user)
-				return res.status(400).json({
+				return res.status(404).json({
 					success: false,
 					errors: [
 						{
-							msg: 'Invalid credentials',
+							msg: 'User do not exist',
 						},
 					],
 				});
@@ -118,7 +137,18 @@ const AuthController = {
 					],
 				});
 
-			const { _id, firstName, lastName, isAdmin, isInstructor, emailVerified } = user;
+			const {
+				_id,
+				firstName,
+				lastName,
+				isAdmin,
+				isInstructor,
+				emailVerified,
+				avatar,
+				address,
+				phoneNumber,
+				region,
+			} = user;
 
 			// Send JWT access token
 			const accessToken = await JWT.sign(
@@ -144,6 +174,10 @@ const AuthController = {
 					isInstructor,
 					email,
 					emailVerified,
+					avatar,
+					address,
+					phoneNumber,
+					region,
 				},
 				accessToken,
 				// refreshToken,
@@ -180,7 +214,7 @@ const AuthController = {
 					success: false,
 					errors: [
 						{
-							msg: 'Invalid credentials',
+							msg: 'User do not exist',
 						},
 					],
 				});

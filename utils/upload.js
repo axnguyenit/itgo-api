@@ -1,7 +1,7 @@
 const multer = require('multer');
 const path = require('path');
 
-const storage = multer.diskStorage({
+const storageCourseImage = multer.diskStorage({
 	destination: (req, file, cb) => {
 		cb(null, path.join('public', 'assets', 'images', 'courses'));
 	},
@@ -10,8 +10,8 @@ const storage = multer.diskStorage({
 	},
 });
 
-const upload = multer({
-	storage,
+const uploadCourseImage = multer({
+	storage: storageCourseImage,
 	fileFilter: (req, file, cb) => {
 		if (file.mimetype.includes('image')) {
 			cb(null, true);
@@ -21,5 +21,30 @@ const upload = multer({
 		}
 	},
 });
+
+// ----------------------------------------------------------------------
+
+const storageAvatar = multer.diskStorage({
+	destination: (req, file, cb) => {
+		cb(null, path.join('public', 'assets', 'images', 'avatar'));
+	},
+	filename: (req, file, cb) => {
+		cb(null, `${Date.now()}.${file.mimetype.split('/').pop()}`);
+	},
+});
+
+const uploadAvatar = multer({
+	storage: storageAvatar,
+	fileFilter: (req, file, cb) => {
+		if (file.mimetype.includes('image')) {
+			cb(null, true);
+		} else {
+			cb(null, false);
+			return;
+		}
+	},
+});
+
+const upload = { uploadCourseImage, uploadAvatar };
 
 module.exports = upload;

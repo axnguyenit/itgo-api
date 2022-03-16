@@ -4,6 +4,7 @@ const Course = require('../models/Course');
 const CourseDetail = require('../models/CourseDetail');
 const Review = require('../models/Review');
 const CartItem = require('../models/CartItem');
+const User = require('../models/User');
 const path = require('path');
 const fs = require('fs');
 
@@ -12,22 +13,139 @@ const fs = require('fs');
 const courseController = {
 	// [GET] /api/courses
 	async index(req, res) {
-		const _totalRows = await Course.countDocuments();
+		let _page = parseInt(req.query._page);
+		let _limit = parseInt(req.query._limit);
+		const _instructor = req.query._instructor;
+
+		if (_instructor) {
+			try {
+				const instructor = await User.findById(_instructor);
+
+				// Instructor not found
+				if (!instructor) {
+					return res.status(404).json({
+						success: false,
+						errors: [
+							{
+								msg: 'Instructor not found',
+							},
+						],
+					});
+				}
+			} catch (error) {
+				console.log(error);
+				return res.status(500).json({ success: false, errors: [{ msg: 'Internal server error' }] });
+			}
+		}
+
+		// get courses base on _page and _limit per _page
+		if (_page) {
+			_page = _page >= 0 ? _page : 1;
+			_limit = _limit || 1;
+			_limit = _limit >= 0 ? _limit : 1;
+			const skipDocs = (_page - 1) * _limit;
+			let query = {};
+			if (_instructor) query = { instructor: _instructor };
+
+			try {
+				const _totalRows = await Course.find(query).count();
+				const courses = await Course.find(query).limit(_limit).skip(skipDocs).populate({
+					path: 'instructor',
+					model: 'User',
+					select: 'email firstName lastName',
+				});
+
+				const pagination = {
+					_page,
+					_limit,
+					_totalRows,
+				};
+				return res.json({ success: true, courses, pagination });
+			} catch (error) {
+				console.log(error);
+				return res.status(500).json({ success: false, errors: [{ msg: 'Internal server error' }] });
+			}
+		}
+
+		// ----------------------------------------------------------------------
+
+		// get all courses
+		try {
+			const courses = await Course.find().populate({
+				path: 'instructor',
+				model: 'User',
+				select: 'email firstName lastName',
+			});
+			return res.json({ success: true, courses });
+		} catch (error) {
+			console.log(error);
+			return res.status(500).json({ success: false, errors: [{ msg: 'Internal server error' }] });
+		}
+	},
+
+	// [POST] /api/courses
+	async store(req, res) {
+		const errors = validationResult(req);
+
+		if (!errors.isEmpty())
+			return res.status(400).json({
+				success: false,
+				errors: errors.array(),
+			});
+
+		const instructor = req.body?.instructor || req.user?._id;
+		const { name, cover, price, priceSale, tags, overview, requirements, targetAudiences } =
+			req.body;
+
+		try {
+			const courseDetails = new CourseDetail({
+				overview,
+				requirements,
+				targetAudiences,
+				reviews: [],
+			});
+			await courseDetails.save();
+
+			const course = new Course({
+				instructor: new mongoose.Types.ObjectId(instructor),
+				name,
+				cover,
+				price,
+				priceSale,
+				tags,
+				details: courseDetails._id,
+			});
+			await course.save();
+
+			return res.json({ success: true, msg: 'Your course was created successfully' });
+		} catch (error) {
+			console.log(error);
+			return res.status(500).json({ success: false, errors: [{ msg: 'Internal server error 1' }] });
+		}
+	},
+
+	// [GET] /api/
+	async getByInstructor(req, res) {
+		const { _id } = req.user;
+		const _totalRows = await Course.find({ instructor: _id }).count();
 		let _page = parseInt(req.query._page);
 		let _limit = parseInt(req.query._limit);
 
 		if (_page) {
 			_page = _page >= 0 ? _page : 1;
-			_limit = _limit ? _limit : 1;
+			_limit = _limit || 1;
 			_limit = _limit >= 0 ? _limit : 1;
 			const skipDocs = (_page - 1) * _limit;
 
 			try {
-				const courses = await Course.find().limit(_limit).skip(skipDocs).populate({
-					path: 'instructor',
-					model: 'User',
-					select: 'email firstName lastName',
-				});
+				const courses = await Course.find({ instructor: _id })
+					.limit(_limit)
+					.skip(skipDocs)
+					.populate({
+						path: 'instructor',
+						model: 'User',
+						select: 'email firstName lastName',
+					});
 
 				const pagination = {
 					_page,
@@ -52,57 +170,6 @@ const courseController = {
 		} catch (error) {
 			console.log(error);
 			return res.status(500).json({ success: false, errors: [{ msg: 'Internal server error' }] });
-		}
-	},
-
-	// [POST] /api/courses
-	async store(req, res) {
-		const errors = validationResult(req);
-
-		if (!errors.isEmpty())
-			return res.status(400).json({
-				success: false,
-				errors: errors.array(),
-			});
-
-		const {
-			instructor,
-			name,
-			cover,
-			price,
-			priceSale,
-			status,
-			tags,
-			overview,
-			requirements,
-			targetAudiences,
-		} = req.body;
-
-		try {
-			const courseDetails = new CourseDetail({
-				overview,
-				requirements,
-				targetAudiences,
-				reviews: [],
-			});
-			await courseDetails.save();
-
-			const course = new Course({
-				instructor: new mongoose.Types.ObjectId(instructor),
-				name,
-				cover,
-				price,
-				priceSale,
-				status,
-				tags,
-				details: courseDetails._id,
-			});
-			await course.save();
-
-			return res.json({ success: true, msg: 'Your course was created successfully' });
-		} catch (error) {
-			console.log(error);
-			return res.status(500).json({ success: false, errors: [{ msg: 'Internal server error 1' }] });
 		}
 	},
 
@@ -132,7 +199,7 @@ const courseController = {
 
 			// course not found
 			if (!course)
-				return res.json({
+				return res.status(404).json({
 					success: false,
 					errors: [
 						{
@@ -159,18 +226,10 @@ const courseController = {
 			});
 
 		const { id } = req.params;
-		const {
-			name,
-			instructor,
-			price,
-			cover,
-			priceSale,
-			status,
-			tags,
-			overview,
-			requirements,
-			targetAudiences,
-		} = req.body;
+		const instructor = req.body?.instructor || req.user?._id;
+		const { name, price, cover, priceSale, tags, overview, requirements, targetAudiences } =
+			req.body;
+
 		try {
 			const course = await Course.findByIdAndUpdate(id, {
 				name,
@@ -178,7 +237,6 @@ const courseController = {
 				price,
 				cover,
 				priceSale,
-				status,
 				tags,
 			});
 			// course not found

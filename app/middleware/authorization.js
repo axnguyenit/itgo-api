@@ -5,9 +5,7 @@ const Cart = require('../models/Cart');
 const authorization = {
 	// only admin & author can update, delete course
 	async canUpdateCourse(req, res, next) {
-		const {
-			user: { _id, isAdmin },
-		} = req;
+		const { _id, isAdmin } = req.user;
 		const { id } = req.params;
 
 		try {
@@ -15,25 +13,12 @@ const authorization = {
 
 			// course not found
 			if (!course)
-				return res.json({
-					success: false,
-					errors: [
-						{
-							msg: 'Course not found',
-						},
-					],
-				});
+				return res.status(400).json({ success: false, errors: [{ msg: 'Course not found' }] });
 
-			const isAuthor = _id === course.instructor;
+			const isAuthor = _id === course.instructor.toString();
+			console.log(isAuthor);
 			if (!isAuthor && !isAdmin)
-				return res.status(403).json({
-					success: false,
-					errors: [
-						{
-							msg: 'Permission denied',
-						},
-					],
-				});
+				return res.status(403).json({ success: false, errors: [{ msg: 'Permission denied' }] });
 
 			next();
 		} catch (error) {
@@ -44,58 +29,53 @@ const authorization = {
 
 	// only admin & instructor can create course
 	canCreateCourse(req, res, next) {
-		const {
-			user: { isAdmin, isInstructor },
-		} = req;
+		const { isAdmin, isInstructor } = req.user;
 
 		if (!isAdmin && !isInstructor)
-			return res.status(403).json({
-				success: false,
-				errors: [
-					{
-						msg: 'Permission denied',
-					},
-				],
-			});
+			return res.status(403).json({ success: false, errors: [{ msg: 'Permission denied' }] });
 
 		next();
 	},
 
 	// only author can update cart
 	async canUpdateCart(req, res, next) {
-		const {
-			user: { _id },
-		} = req;
+		const { _id } = req.user;
 		const { id } = req.params;
+		try {
+			const cart = await Cart.findById(id);
+			if (!cart) return res.json({ success: false, errors: [{ msg: 'Cart not found' }] });
 
-		const cart = await Cart.findById(id);
-		if (!cart)
-			return res.json({
-				success: false,
-				errors: [
-					{
-						msg: 'Cart not found',
-					},
-				],
-			});
+			const isAuthor = cart.userId === _id;
+			if (!isAuthor)
+				return res.status(403).json({ success: false, errors: [{ msg: 'Permission denied' }] });
 
-		const isAuthor = cart.userId === _id;
-		if (!isAuthor)
-			return res.status(403).json({
-				success: false,
-				errors: [
-					{
-						msg: 'Permission denied',
-					},
-				],
-			});
+			next();
+		} catch (error) {
+			console.log(error);
+			return res.status(500).json({ success: false, errors: [{ msg: 'Internal server error' }] });
+		}
+	},
+
+	// only author & admin can update user info
+	async canUpdateAccount(req, res, next) {
+		const { _id, isAdmin } = req.user;
+		const { id } = req.params;
+		const isAuthor = _id === id;
+
+		if (!isAdmin && !isAuthor)
+			return res.status(403).json({ success: false, errors: [{ msg: 'Permission denied' }] });
 
 		next();
 	},
 
-	// async canRemoveCartItem(req, res, next) {
+	// verify that who is admin
+	async isAdmin(req, res, next) {
+		const { isAdmin } = req.user;
 
-	// }
+		if (!isAdmin)
+			return res.status(403).json({ success: false, errors: [{ msg: 'Permission denied' }] });
+		next();
+	},
 };
 
 module.exports = authorization;

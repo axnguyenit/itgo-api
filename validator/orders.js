@@ -5,8 +5,6 @@ const order = [
 	check('items', 'Items is require.').notEmpty(),
 ];
 
-const validator = {
-	order,
-};
+const validator = { order };
 
 module.exports = validator;
