@@ -9,41 +9,25 @@ const CartController = {
 	async store(req, res) {
 		const errors = validationResult(req);
 
-		if (!errors.isEmpty())
-			return res.status(400).json({
-				success: false,
-				errors: errors.array(),
-			});
+		if (!errors.isEmpty()) return res.status(400).json({ success: false, errors: errors.array() });
 
 		const {
 			user: { _id },
 		} = req;
-		const { courseId, total } = req.body;
+		const { courseId } = req.body;
 
 		try {
 			const course = await Course.findById(courseId);
 			// course not found
 			if (!course)
-				return res.status(404).json({
-					success: false,
-					errors: [
-						{
-							msg: 'Course not found',
-						},
-					],
-				});
+				return res.status(400).json({ success: false, errors: [{ msg: 'Course not found' }] });
 
 			const cartItem = await CartItem.findOne({ course: courseId });
 
 			if (cartItem)
-				return res.status(409).json({
-					success: false,
-					errors: [
-						{
-							msg: 'This course already exists in your cart',
-						},
-					],
-				});
+				return res
+					.status(409)
+					.json({ success: false, errors: [{ msg: 'This course already exists in your cart' }] });
 		} catch (error) {
 			console.log(error);
 			return res.status(500).json({ success: false, errors: [{ msg: 'Internal server error' }] });
@@ -82,14 +66,7 @@ const CartController = {
 			const cart = await Cart.findOne({ userId: _id });
 
 			if (!cart)
-				return res.json({
-					success: false,
-					errors: [
-						{
-							msg: 'Cart not found',
-						},
-					],
-				});
+				return res.status(400).json({ success: false, errors: [{ msg: 'Cart not found' }] });
 
 			const cartItems = await CartItem.find({ cartId: cart._id }).populate({
 				path: 'course',
@@ -97,11 +74,7 @@ const CartController = {
 				select: 'name cover price priceSale',
 			});
 
-			return res.json({
-				success: true,
-				cart,
-				cartItems,
-			});
+			return res.json({ success: true, cart, cartItems });
 		} catch (error) {
 			console.log(error);
 			return res.status(500).json({ success: false, errors: [{ msg: 'Internal server error' }] });
@@ -115,7 +88,7 @@ const CartController = {
 			const cartItem = await CartItem.findByIdAndDelete(cartItemId);
 
 			if (!cartItem)
-				return res.status(404).json({ success: false, errors: [{ msg: 'Cart item not found' }] });
+				return res.status(400).json({ success: false, errors: [{ msg: 'Cart item not found' }] });
 			return res.json({ success: true, msg: 'Cart item was removed successfully' });
 		} catch (error) {
 			console.log(error);

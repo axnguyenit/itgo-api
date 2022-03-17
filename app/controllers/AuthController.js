@@ -20,15 +20,9 @@ const AuthController = {
 
 		// Validate if user already exist
 		if (user) {
-			return res.status(409).json({
-				success: false,
-				errors: [
-					{
-						email: user.email,
-						msg: 'The user already exist',
-					},
-				],
-			});
+			return res
+				.status(409)
+				.json({ success: false, errors: [{ email: user.email, msg: 'The user already exist' }] });
 		}
 
 		// Hash password before saving to database
@@ -68,13 +62,8 @@ const AuthController = {
 			const accessToken = await JWT.sign(
 				{ _id, firstName, lastName, email, isAdmin, isInstructor },
 				process.env.ACCESS_TOKEN_SECRET,
-				{
-					expiresIn: '1h',
-				}
+				{ expiresIn: '12h' }
 			);
-
-			// const order = new Order({ userId: newUser._id });
-			// await order.save();
 
 			return res.json({
 				success: true,
@@ -115,27 +104,15 @@ const AuthController = {
 
 			// user not found
 			if (!user)
-				return res.status(404).json({
-					success: false,
-					errors: [
-						{
-							msg: 'User do not exist',
-						},
-					],
-				});
+				return res.status(400).json({ success: false, errors: [{ msg: 'User do not exist' }] });
 
 			// Compare hased password with user password to see if they are valid
 			const isMatch = await bcrypt.compareSync(password, user.password);
 
 			if (!isMatch)
-				return res.status(401).json({
-					success: false,
-					errors: [
-						{
-							msg: 'Email or password is invalid.',
-						},
-					],
-				});
+				return res
+					.status(401)
+					.json({ success: false, errors: [{ msg: 'Email or password is invalid.' }] });
 
 			const {
 				_id,
@@ -154,15 +131,8 @@ const AuthController = {
 			const accessToken = await JWT.sign(
 				{ _id, firstName, lastName, email, isAdmin, isInstructor },
 				process.env.ACCESS_TOKEN_SECRET,
-				{
-					expiresIn: '1h',
-				}
+				{ expiresIn: '12h' }
 			);
-
-			// Refresh token
-			// const refreshToken = await JWT.sign({ email }, process.env.REFRESH_TOKEN_SECRET, {
-			// 	expiresIn: '3d',
-			// });
 
 			return res.json({
 				success: true,
@@ -180,27 +150,14 @@ const AuthController = {
 					region,
 				},
 				accessToken,
-				// refreshToken,
 			});
-
-			// Set refersh token in refreshTokens array
-			// User.updateOne({ email: user.email }, { refreshToken: refreshToken })
-			// 	.then(() =>
-			// 		res.json({
-			// 			success: true,
-			// 			accessToken,
-			// 			refreshToken,
-			// 		})
-			// 	)
-			// 	.catch((error) =>
-			// 		res.status(500).json({ success: false, errors: [{ msg: 'Internal server error' }] })
-			// 	);
 		} catch (error) {
 			console.log(error);
 			return res.status(500).json({ success: false, errors: [{ msg: 'Internal server error' }] });
 		}
 	},
 
+	// [GET] /api/users/my-account
 	async myAccount(req, res) {
 		const {
 			user: { _id },
@@ -210,14 +167,7 @@ const AuthController = {
 
 			// user not found
 			if (!user)
-				return res.status(400).json({
-					success: false,
-					errors: [
-						{
-							msg: 'User do not exist',
-						},
-					],
-				});
+				return res.status(400).json({ success: false, errors: [{ msg: 'User do not exist' }] });
 
 			const { firstName, lastName, email, isAdmin, isInstructor, emailVerified } = user;
 
@@ -238,29 +188,6 @@ const AuthController = {
 			return res.status(500).json({ success: false, errors: [{ msg: 'Internal server error' }] });
 		}
 	},
-
-	// async logout(req, res) {
-	// 	const refreshToken = req.header('x-auth-token');
-
-	// 	try {
-	// 		const user = await JWT.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
-	// 		if (user.email) {
-	// 			User.updateOne({ email: user.email }, { refreshToken: '' })
-	// 				.then(() => {
-	// 					res.sendStatus(200);
-	// 				})
-	// 				.catch((err) => res.json(err));
-	// 		}
-	// 	} catch (error) {
-	// 		res.status(403).json({
-	// 			errors: [
-	// 				{
-	// 					msg: 'Invalid token',
-	// 				},
-	// 			],
-	// 		});
-	// 	}
-	// }
 };
 
 module.exports = AuthController;

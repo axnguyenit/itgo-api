@@ -21,11 +21,7 @@ const UserController = {
 					.skip(skipDocs)
 					.select('firstName lastName email isInstructor emailVerified avatar position isBanned');
 
-				const pagination = {
-					_page,
-					_limit,
-					_totalRows,
-				};
+				const pagination = { _page, _limit, _totalRows };
 				return res.json({ success: true, users, pagination });
 			} catch (error) {
 				console.log(error);
@@ -59,10 +55,7 @@ const UserController = {
 			if (!user)
 				return res.status(400).json({ success: false, errors: [{ msg: 'User do not exist' }] });
 
-			return res.json({
-				success: true,
-				user,
-			});
+			return res.json({ success: true, user });
 		} catch (error) {
 			console.log(error);
 			return res.status(500).json({ success: false, errors: [{ msg: 'Internal server error' }] });
@@ -108,11 +101,7 @@ const UserController = {
 					.skip(skipDocs)
 					.select('firstName lastName avatar position');
 
-				const pagination = {
-					_page,
-					_limit,
-					_totalRows,
-				};
+				const pagination = { _page, _limit, _totalRows };
 
 				return res.json({ success: true, instructors, pagination });
 			} catch (error) {

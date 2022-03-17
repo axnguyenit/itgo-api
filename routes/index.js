@@ -6,6 +6,7 @@ const zoomRouter = require('./zoom');
 const courseRouter = require('./courses');
 const userRouter = require('./users');
 const instructorRouter = require('./instructors');
+const paymentRouter = require('./payment');
 
 const routes = (app) => {
 	app.use('/api/auth', authRouter);
@@ -16,6 +17,7 @@ const routes = (app) => {
 	app.use('/api/users', userRouter);
 	app.use('/api/upload', uploadRouter);
 	app.use('/api/instructors', instructorRouter);
+	app.use('/api/payment', paymentRouter);
 	app.use('/', (req, res) => res.render('index'));
 };
 
