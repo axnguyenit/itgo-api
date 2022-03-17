@@ -7,7 +7,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const dotenv = require('dotenv');
 const bodyParser = require('body-parser');
-const db = require('./config/db');
+const database = require('./config/database');
 const routes = require('./routes');
 // const fs = require('fs');
 // const swaggerUI = require('swagger-ui-express');
@@ -31,8 +31,8 @@ app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// connect db
-db.connect();
+// connect database
+database.connect();
 
 // Swagger configuration
 // const swaggerOptions = {

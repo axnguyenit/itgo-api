@@ -16,7 +16,6 @@ const authorization = {
 				return res.status(400).json({ success: false, errors: [{ msg: 'Course not found' }] });
 
 			const isAuthor = _id === course.instructor.toString();
-			console.log(isAuthor);
 			if (!isAuthor && !isAdmin)
 				return res.status(403).json({ success: false, errors: [{ msg: 'Permission denied' }] });
 

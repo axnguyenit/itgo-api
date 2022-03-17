@@ -13,6 +13,11 @@ const Order = new Schema(
 			required: true,
 			min: 0,
 		},
+		paymentId: {
+			type: Schema.Types.ObjectId,
+			required: true,
+			ref: 'Payment',
+		},
 	},
 	{
 		timestamps: true,

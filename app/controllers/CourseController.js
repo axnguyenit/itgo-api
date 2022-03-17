@@ -22,16 +22,10 @@ const courseController = {
 				const instructor = await User.findById(_instructor);
 
 				// Instructor not found
-				if (!instructor) {
-					return res.status(404).json({
-						success: false,
-						errors: [
-							{
-								msg: 'Instructor not found',
-							},
-						],
-					});
-				}
+				if (!instructor)
+					return res
+						.status(400)
+						.json({ success: false, errors: [{ msg: 'Instructor not found' }] });
 			} catch (error) {
 				console.log(error);
 				return res.status(500).json({ success: false, errors: [{ msg: 'Internal server error' }] });
@@ -55,11 +49,7 @@ const courseController = {
 					select: 'email firstName lastName',
 				});
 
-				const pagination = {
-					_page,
-					_limit,
-					_totalRows,
-				};
+				const pagination = { _page, _limit, _totalRows };
 				return res.json({ success: true, courses, pagination });
 			} catch (error) {
 				console.log(error);
@@ -87,11 +77,7 @@ const courseController = {
 	async store(req, res) {
 		const errors = validationResult(req);
 
-		if (!errors.isEmpty())
-			return res.status(400).json({
-				success: false,
-				errors: errors.array(),
-			});
+		if (!errors.isEmpty()) return res.status(400).json({ success: false, errors: errors.array() });
 
 		const instructor = req.body?.instructor || req.user?._id;
 		const { name, cover, price, priceSale, tags, overview, requirements, targetAudiences } =
@@ -147,11 +133,7 @@ const courseController = {
 						select: 'email firstName lastName',
 					});
 
-				const pagination = {
-					_page,
-					_limit,
-					_totalRows,
-				};
+				const pagination = { _page, _limit, _totalRows };
 				return res.json({ success: true, courses, pagination });
 			} catch (error) {
 				console.log(error);
@@ -199,14 +181,7 @@ const courseController = {
 
 			// course not found
 			if (!course)
-				return res.status(404).json({
-					success: false,
-					errors: [
-						{
-							msg: 'Course not found',
-						},
-					],
-				});
+				return res.status(400).json({ success: false, errors: [{ msg: 'Course not found' }] });
 
 			return res.json({ success: true, course });
 		} catch (error) {
@@ -219,11 +194,7 @@ const courseController = {
 	async update(req, res) {
 		const errors = validationResult(req);
 
-		if (!errors.isEmpty())
-			return res.status(400).json({
-				success: false,
-				errors: errors.array(),
-			});
+		if (!errors.isEmpty()) return res.status(400).json({ success: false, errors: errors.array() });
 
 		const { id } = req.params;
 		const instructor = req.body?.instructor || req.user?._id;
@@ -241,14 +212,7 @@ const courseController = {
 			});
 			// course not found
 			if (!course)
-				return res.json({
-					success: false,
-					errors: [
-						{
-							msg: 'Course not found',
-						},
-					],
-				});
+				return res.status(400).json({ success: false, errors: [{ msg: 'Course not found' }] });
 
 			await CourseDetail.findByIdAndUpdate(course.details, {
 				overview,
@@ -256,10 +220,7 @@ const courseController = {
 				targetAudiences,
 			});
 
-			return res.json({
-				success: true,
-				msg: 'Your course was updated successfully',
-			});
+			return res.json({ success: true, msg: 'Your course was updated successfully' });
 		} catch (error) {
 			console.log(error);
 			return res.status(500).json({ success: false, errors: [{ msg: 'Internal server error' }] });
@@ -274,14 +235,7 @@ const courseController = {
 
 			// course not found
 			if (!course)
-				return res.status(404).json({
-					success: false,
-					errors: [
-						{
-							msg: 'Course not found',
-						},
-					],
-				});
+				return res.status(400).json({ success: false, errors: [{ msg: 'Course not found' }] });
 
 			const { base } = path.parse(course.cover);
 			fs.unlinkSync(path.join('public', 'assets', 'images', 'courses', base));
