@@ -11,9 +11,7 @@ const CartController = {
 
 		if (!errors.isEmpty()) return res.status(400).json({ success: false, errors: errors.array() });
 
-		const {
-			user: { _id },
-		} = req;
+		const { _id } = req.user;
 		const { courseId } = req.body;
 
 		try {
@@ -22,35 +20,32 @@ const CartController = {
 			if (!course)
 				return res.status(400).json({ success: false, errors: [{ msg: 'Course not found' }] });
 
-			const cartItem = await CartItem.findOne({ course: courseId });
+			const cart = await Cart.findOne({ userId: _id });
+			// cart not found
+			let newCart = null;
+			if (!cart) {
+				newCart = new Cart({ userId: _id });
+				await newCart.save();
+			}
+
+			const query = {
+				course: courseId,
+				cartId: cart ? cart._id : newCart._id,
+			};
+			const cartItem = await CartItem.findOne(query);
 
 			if (cartItem)
 				return res
 					.status(409)
 					.json({ success: false, errors: [{ msg: 'This course already exists in your cart' }] });
-		} catch (error) {
-			console.log(error);
-			return res.status(500).json({ success: false, errors: [{ msg: 'Internal server error' }] });
-		}
 
-		try {
-			const cart = await Cart.findOne({ userId: _id });
-			// cart not found
-			let newCart = null;
-			if (!cart) {
-				newCart = new Cart({
-					userId: _id,
-				});
-				await newCart.save();
-			}
-
-			const cartItem = new CartItem({
+			const newCartItem = new CartItem({
 				cartId: cart ? cart._id : newCart._id,
 				course: new mongoose.Types.ObjectId(courseId),
 			});
-			await cartItem.save();
+			await newCartItem.save();
 
-			return res.json({ success: true, cartItem, msg: 'Add to cart successfully' });
+			return res.json({ success: true, cartItem: newCartItem, msg: 'Add to cart successfully' });
 		} catch (error) {
 			console.log(error);
 			return res.status(500).json({ success: false, errors: [{ msg: 'Internal server error' }] });
