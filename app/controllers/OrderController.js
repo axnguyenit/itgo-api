@@ -1,47 +1,66 @@
-const { validationResult } = require('express-validator');
 const Order = require('../models/Order');
+const OrderItem = require('../models/OrderItem');
 
 const OrderController = {
-	// [GET] /api/orders/:userId
-	async show(req, res) {
-		const { userId } = req.params;
-		try {
-			const order = await Order.findOne({ userId });
-			if (!order)
-				return res.status(400).json({ success: false, errors: [{ msg: 'User ID is invalid.' }] });
-			return res.json({ success: true, order });
-		} catch (error) {
-			console.log(error);
-			return res.status(500).json({ success: false, errors: [{ msg: 'Internal server error' }] });
+	// [GET] /api/orders
+	async index(req, res) {},
+
+	// [GET] /api/orders/:id
+	async show(req, res) {},
+
+	// [GET] /api/orders/my-orders
+	async getByUser(req, res) {
+		let _page = parseInt(req.query._page);
+		let _limit = parseInt(req.query._limit);
+		const { _id } = req.user;
+		const query = { userId: _id };
+
+		// get orders base on _page and _limit per _page
+		if (_page) {
+			_page = _page >= 0 ? _page : 1;
+			_limit = _limit || 1;
+			_limit = _limit >= 0 ? _limit : 1;
+			const skipDocs = (_page - 1) * _limit;
+
+			try {
+				const _totalRows = await OrderItem.find(query).count();
+				const orders = await OrderItem.find(query)
+					.limit(_limit)
+					.skip(skipDocs)
+					.populate({
+						path: 'course',
+						model: 'Course',
+						select: 'name cover instructor',
+						populate: {
+							path: 'instructor',
+							model: 'User',
+							select: 'firstName lastName',
+						},
+					});
+
+				const pagination = { _page, _limit, _totalRows };
+				return res.json({ success: true, orders, pagination });
+			} catch (error) {
+				console.log(error);
+				return res.status(500).json({ success: false, errors: [{ msg: 'Internal server error' }] });
+			}
 		}
-	},
 
-	// [PUT] /api/orders/:id
-	async update(req, res) {
-		const errors = validationResult(req);
+		// ----------------------------------------------------------------------
 
-		if (!errors.isEmpty()) return res.status(400).json({ success: false, errors: errors.array() });
-
-		const { id } = req.params;
-		const { items } = req.body;
-
+		// get all orders
 		try {
-			const order = await Order.findById(id);
-			if (!order) return;
-
-			const enrolledCourse = items.find((item) => {
-				return order.items.find((item2) => Object.values(item).includes(item2.courseId));
+			const orders = await OrderItem.find(query).populate({
+				path: 'course',
+				model: 'Course',
+				select: 'name cover instructor',
+				populate: {
+					path: 'instructor',
+					model: 'User',
+					select: 'firstName lastName',
+				},
 			});
-
-			if (enrolledCourse)
-				return res.status(400).json({
-					enrolledCourse,
-					success: false,
-					errors: [{ msg: 'This course is enrolled' }],
-				});
-			const newItems = [...order.items, ...items];
-			await Order.updateOne({ _id: id }, { items: newItems });
-			return res.status(400).json({ success: true, errors: [{ msg: 'Updated' }] });
+			return res.json({ success: true, orders });
 		} catch (error) {
 			console.log(error);
 			return res.status(500).json({ success: false, errors: [{ msg: 'Internal server error' }] });
