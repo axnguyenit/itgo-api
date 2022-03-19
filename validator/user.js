@@ -28,6 +28,13 @@ const updateAccount = [
 	check('email', 'Invalid email.').isEmail(),
 ];
 
+const forgotPassword = [
+	check('email', 'Email is required').notEmpty(),
+	check('email', 'Invalid email.').isEmail(),
+];
+
+const verifyEmail = forgotPassword;
+
 const resetPassword = [
 	check('password', 'Password is required').notEmpty(),
 	check('password', 'Password must be at least 6 characters').isLength({ min: 6 }),
@@ -40,6 +47,14 @@ const changePassword = [
 	check('password', 'Password must be at least 6 characters').isLength({ min: 6 }),
 ];
 
-const validator = { register, login, updateAccount, resetPassword, changePassword };
+const validator = {
+	register,
+	login,
+	verifyEmail,
+	updateAccount,
+	forgotPassword,
+	resetPassword,
+	changePassword,
+};
 
 module.exports = validator;
