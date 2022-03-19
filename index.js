@@ -5,6 +5,7 @@ const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const cors = require('cors');
 const helmet = require('helmet');
+const { engine } = require('express-handlebars');
 const dotenv = require('dotenv');
 const bodyParser = require('body-parser');
 const database = require('./config/database');
@@ -18,8 +19,10 @@ dotenv.config();
 const app = express();
 
 // view engine setup
+
+app.engine('hbs', engine({ extname: '.hbs' }));
 app.set('views', path.join(__dirname, 'resources', 'views'));
-app.set('view engine', 'jade');
+app.set('view engine', 'hbs');
 
 app.use(cors());
 app.use(helmet.crossOriginResourcePolicy({ policy: 'cross-origin' }));

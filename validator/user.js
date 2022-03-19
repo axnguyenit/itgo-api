@@ -9,6 +9,8 @@ const register = [
 	check('email', 'Invalid email.').isEmail(),
 	check('password', 'Password is required').notEmpty(),
 	check('password', 'Password must be at least 6 characters').isLength({ min: 6 }),
+	check('confirmPassword', 'Confirm password is required').notEmpty(),
+	check('confirmPassword', 'Confirm password must be at least 6 characters').isLength({ min: 6 }),
 ];
 
 const login = [
@@ -26,11 +28,18 @@ const updateAccount = [
 	check('email', 'Invalid email.').isEmail(),
 ];
 
+const resetPassword = [
+	check('password', 'Password is required').notEmpty(),
+	check('password', 'Password must be at least 6 characters').isLength({ min: 6 }),
+	check('confirmPassword', 'Confirm password is required').notEmpty(),
+	check('confirmPassword', 'Confirm password must be at least 6 characters').isLength({ min: 6 }),
+];
+
 const changePassword = [
 	check('password', 'Password is required').notEmpty(),
 	check('password', 'Password must be at least 6 characters').isLength({ min: 6 }),
 ];
 
-const validator = { register, login, updateAccount, changePassword };
+const validator = { register, login, updateAccount, resetPassword, changePassword };
 
 module.exports = validator;
