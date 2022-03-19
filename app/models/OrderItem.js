@@ -1,9 +1,14 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
-const Order = new Schema(
+const OrderItem = new Schema(
 	{
 		orderId: {
+			type: String,
+			required: true,
+			trim: true,
+		},
+		userId: {
 			type: String,
 			required: true,
 			trim: true,
@@ -23,4 +28,4 @@ const Order = new Schema(
 	}
 );
 
-module.exports = mongoose.model('Order', Order);
+module.exports = mongoose.model('OrderItem', OrderItem);

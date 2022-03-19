@@ -79,8 +79,7 @@ const UserController = {
 		}
 	},
 
-	// ----------------------------------------------------------------------
-
+	// [GET] /api/instructors
 	async getAllInstructors(req, res) {
 		let _page = parseInt(req.query._page);
 		let _limit = parseInt(req.query._limit);

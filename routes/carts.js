@@ -7,7 +7,6 @@ const verifyToken = require('../app/middleware/authentication');
 
 router.get('/', verifyToken, cartController.show);
 router.delete('/:cartItemId', verifyToken, cartController.removeItem);
-
 router.post('/', verifyToken, validator.cartStore, cartController.store);
 
 module.exports = router;

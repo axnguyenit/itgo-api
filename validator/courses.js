@@ -6,7 +6,6 @@ const course = [
 	check('cover', 'Cover must be a string').isString(),
 	check('price', 'Price must be must be a integer more than 1000').isInt({ gt: 1000 }),
 	check('priceSale', 'Price sale must be a integer more than 1000').isInt(),
-	check('tags', 'Tags is required').notEmpty(),
 	check('overview', 'Overview is required').notEmpty(),
 	check('overview', 'Overview must be a string').isString(),
 	check('requirements', 'Requirements is required').notEmpty(),

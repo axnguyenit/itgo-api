@@ -156,38 +156,6 @@ const AuthController = {
 			return res.status(500).json({ success: false, errors: [{ msg: 'Internal server error' }] });
 		}
 	},
-
-	// [GET] /api/users/my-account
-	async myAccount(req, res) {
-		const {
-			user: { _id },
-		} = req;
-		try {
-			const user = await User.findById(_id);
-
-			// user not found
-			if (!user)
-				return res.status(400).json({ success: false, errors: [{ msg: 'User do not exist' }] });
-
-			const { firstName, lastName, email, isAdmin, isInstructor, emailVerified } = user;
-
-			return res.json({
-				success: true,
-				user: {
-					_id,
-					firstName,
-					lastName,
-					isAdmin,
-					isInstructor,
-					email,
-					emailVerified,
-				},
-			});
-		} catch (error) {
-			console.log(error);
-			return res.status(500).json({ success: false, errors: [{ msg: 'Internal server error' }] });
-		}
-	},
 };
 
 module.exports = AuthController;
