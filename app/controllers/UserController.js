@@ -22,10 +22,10 @@ const UserController = {
 					.select('firstName lastName email isInstructor emailVerified avatar position isBanned');
 
 				const pagination = { _page, _limit, _totalRows };
-				return res.json({ success: true, users, pagination });
+				return res.json({ users, pagination });
 			} catch (error) {
 				console.log(error);
-				return res.status(500).json({ success: false, errors: [{ msg: 'Internal server error' }] });
+				return res.status(500).json({ errors: [{ msg: 'Internal server error' }] });
 			}
 		}
 
@@ -36,10 +36,10 @@ const UserController = {
 			const users = await User.find(query).select(
 				'firstName lastName email isInstructor emailVerified avatar position isBanned'
 			);
-			return res.json({ success: true, users });
+			return res.json({ users });
 		} catch (error) {
 			console.log(error);
-			return res.status(500).json({ success: false, errors: [{ msg: 'Internal server error' }] });
+			return res.status(500).json({ errors: [{ msg: 'Internal server error' }] });
 		}
 	},
 
@@ -52,13 +52,12 @@ const UserController = {
 			);
 
 			// user not found
-			if (!user)
-				return res.status(400).json({ success: false, errors: [{ msg: 'User do not exist' }] });
+			if (!user) return res.status(400).json({ errors: [{ msg: 'User do not exist' }] });
 
-			return res.json({ success: true, user });
+			return res.json({ user });
 		} catch (error) {
 			console.log(error);
-			return res.status(500).json({ success: false, errors: [{ msg: 'Internal server error' }] });
+			return res.status(500).json({ errors: [{ msg: 'Internal server error' }] });
 		}
 	},
 
@@ -66,16 +65,16 @@ const UserController = {
 	async updateAccount(req, res) {
 		const errors = validationResult(req);
 
-		if (!errors.isEmpty()) return res.status(400).json({ success: false, errors: errors.array() });
+		if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
 
 		const { id } = req.params;
 
 		try {
 			await User.findByIdAndUpdate(id, { ...req.body });
-			return res.json({ success: true, msg: 'Account was updated successfully' });
+			return res.json({ msg: 'Account was updated successfully' });
 		} catch (error) {
 			console.log(error);
-			return res.status(500).json({ success: false, errors: [{ msg: 'Internal server error' }] });
+			return res.status(500).json({ errors: [{ msg: 'Internal server error' }] });
 		}
 	},
 
@@ -102,20 +101,20 @@ const UserController = {
 
 				const pagination = { _page, _limit, _totalRows };
 
-				return res.json({ success: true, instructors, pagination });
+				return res.json({ instructors, pagination });
 			} catch (error) {
 				console.log(error);
-				return res.status(500).json({ success: false, errors: [{ msg: 'Internal server error' }] });
+				return res.status(500).json({ errors: [{ msg: 'Internal server error' }] });
 			}
 		}
 
 		// get all instructors
 		try {
-			const instructors = await User.find(query).select('firstName lastName avatar position');
-			return res.json({ success: true, instructors });
+			const instructors = await User.find(query).select('firstName lastName avatar position email');
+			return res.json({ instructors });
 		} catch (error) {
 			console.log(error);
-			return res.status(500).json({ success: false, errors: [{ msg: 'Internal server error' }] });
+			return res.status(500).json({ errors: [{ msg: 'Internal server error' }] });
 		}
 	},
 

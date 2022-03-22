@@ -10,10 +10,7 @@ const AuthController = {
 		const errors = validationResult(req);
 		// Validate user input
 		if (!errors.isEmpty()) {
-			return res.status(400).json({
-				success: false,
-				errors: errors.array(),
-			});
+			return res.status(400).json({ errors: errors.array() });
 		}
 		try {
 			const { firstName, lastName, email, password, confirmPassword } = req.body;
@@ -23,13 +20,11 @@ const AuthController = {
 			if (user) {
 				return res
 					.status(409)
-					.json({ success: false, errors: [{ email: user.email, msg: 'The user already exist' }] });
+					.json({ errors: [{ email: user.email, msg: 'The user already exist' }] });
 			}
 
 			if (password !== confirmPassword)
-				return res
-					.status(400)
-					.json({ success: false, errors: [{ msg: 'Confirm password not match' }] });
+				return res.status(400).json({ errors: [{ msg: 'Confirm password not match' }] });
 
 			// Hash password before saving to database
 			const salt = await bcrypt.genSalt(10);
@@ -65,22 +60,19 @@ const AuthController = {
 			await transporter.sendMail(mailOptions, function (error, info) {
 				if (error) {
 					console.log(error.message);
-					return res
-						.status(500)
-						.json({ success: false, errors: [{ msg: 'Internal server error' }] });
+					return res.status(500).json({ errors: [{ msg: 'Internal server error' }] });
 				} else {
 					return res.json({
-						success: true,
 						email,
 						msg: `We have sent a verify email link to ${email}`,
 					});
 				}
 			});
 
-			return res.json({ success: true, msg: 'Registered an account successfully' });
+			return res.json({ msg: 'Registered an account successfully' });
 		} catch (error) {
 			console.log(error.message);
-			return res.status(500).json({ success: false, errors: [{ msg: 'Internal server error' }] });
+			return res.status(500).json({ errors: [{ msg: 'Internal server error' }] });
 		}
 	},
 
@@ -88,23 +80,20 @@ const AuthController = {
 	async login(req, res) {
 		const errors = validationResult(req);
 		// Validate user input
-		if (!errors.isEmpty()) return res.status(400).json({ success: false, errors: errors.array() });
+		if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
 
 		try {
 			const { email, password } = req.body;
 			const user = await User.findOne({ email: email });
 
 			// user not found
-			if (!user)
-				return res.status(400).json({ success: false, errors: [{ msg: 'User do not exist' }] });
+			if (!user) return res.status(400).json({ errors: [{ msg: 'User do not exist' }] });
 
 			// Compare hased password with user password to see if they are valid
 			const isMatch = await bcrypt.compareSync(password, user.password);
 
 			if (!isMatch)
-				return res
-					.status(401)
-					.json({ success: false, errors: [{ msg: 'Email or password is invalid.' }] });
+				return res.status(401).json({ errors: [{ msg: 'Email or password is invalid.' }] });
 
 			const {
 				_id,
@@ -127,7 +116,6 @@ const AuthController = {
 			);
 
 			return res.json({
-				success: true,
 				user: {
 					_id,
 					firstName,
@@ -145,7 +133,7 @@ const AuthController = {
 			});
 		} catch (error) {
 			console.log(error);
-			return res.status(500).json({ success: false, errors: [{ msg: 'Internal server error' }] });
+			return res.status(500).json({ errors: [{ msg: 'Internal server error' }] });
 		}
 	},
 
@@ -157,8 +145,7 @@ const AuthController = {
 			const user = await User.findOne({ email });
 
 			// User not found
-			if (!user)
-				return res.status(400).json({ success: false, errors: [{ msg: 'User not registered' }] });
+			if (!user) return res.status(400).json({ errors: [{ msg: 'User not registered' }] });
 
 			const secret = `${process.env.ACCESS_TOKEN_SECRET}${user.emailVerified}`;
 			const token = JWT.sign({ email }, secret, { expiresIn: '10m' });
@@ -178,12 +165,9 @@ const AuthController = {
 			await transporter.sendMail(mailOptions, function (error, info) {
 				if (error) {
 					console.log(error);
-					return res
-						.status(500)
-						.json({ success: false, errors: [{ msg: 'Internal server error' }] });
+					return res.status(500).json({ errors: [{ msg: 'Internal server error' }] });
 				} else {
 					return res.json({
-						success: true,
 						email,
 						msg: `We have sent a verify email link to ${email}`,
 					});
@@ -191,7 +175,7 @@ const AuthController = {
 			});
 		} catch (error) {
 			console.log(error.message);
-			return res.status(500).json({ success: false, errors: [{ msg: 'Internal server error' }] });
+			return res.status(500).json({ errors: [{ msg: 'Internal server error' }] });
 		}
 	},
 
@@ -203,28 +187,25 @@ const AuthController = {
 			const user = await User.findById(id);
 
 			// User not found
-			if (!user)
-				return res.status(400).json({ success: false, errors: [{ msg: 'User not found' }] });
+			if (!user) return res.status(400).json({ errors: [{ msg: 'User not found' }] });
 
-			if (user.emailVerified) {
-				return res.json({ success: true });
-			}
+			if (user.emailVerified) return res.json({});
 
 			const secret = `${process.env.ACCESS_TOKEN_SECRET}${user.emailVerified}`;
 			await JWT.verify(token, secret);
 			await User.findByIdAndUpdate(id, { emailVerified: true });
 
-			return res.json({ success: true });
+			return res.json({});
 		} catch (error) {
 			console.log(error.message);
-			return res.status(500).json({ success: false, errors: [{ msg: 'Internal server error' }] });
+			return res.status(500).json({ errors: [{ msg: 'Internal server error' }] });
 		}
 	},
 
 	// [POST] /api/auth/forgot-password
 	async forgotPassword(req, res) {
 		const errors = validationResult(req);
-		if (!errors.isEmpty()) return res.status(400).json({ success: false, errors: errors.array() });
+		if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
 
 		const { email } = req.body;
 
@@ -232,8 +213,7 @@ const AuthController = {
 			const user = await User.findOne({ email });
 
 			// User not found
-			if (!user)
-				return res.status(400).json({ success: false, errors: [{ msg: 'User not registered' }] });
+			if (!user) return res.status(400).json({ errors: [{ msg: 'User not registered' }] });
 
 			const secret = `${process.env.ACCESS_TOKEN_SECRET}${user.password}`;
 			const token = JWT.sign({ email }, secret, { expiresIn: '10m' });
@@ -254,12 +234,9 @@ const AuthController = {
 			await transporter.sendMail(mailOptions, function (error, info) {
 				if (error) {
 					console.log(error);
-					return res
-						.status(500)
-						.json({ success: false, errors: [{ msg: 'Internal server error' }] });
+					return res.status(500).json({ errors: [{ msg: 'Internal server error' }] });
 				} else {
 					return res.json({
-						success: true,
 						email,
 						msg: `We have sent a reset password link to ${email}`,
 					});
@@ -267,7 +244,7 @@ const AuthController = {
 			});
 		} catch (error) {
 			console.log(error.message);
-			return res.status(500).json({ success: false, errors: [{ msg: 'Internal server error' }] });
+			return res.status(500).json({ errors: [{ msg: 'Internal server error' }] });
 		}
 	},
 
@@ -279,31 +256,28 @@ const AuthController = {
 			const user = await User.findById(id);
 
 			// User not found
-			if (!user)
-				return res.status(400).json({ success: false, errors: [{ msg: 'User not found' }] });
+			if (!user) return res.status(400).json({ errors: [{ msg: 'User not found' }] });
 
 			const secret = `${process.env.ACCESS_TOKEN_SECRET}${user.password}`;
 			await JWT.verify(token, secret);
 
-			return res.json({ success: true });
+			return res.json({});
 		} catch (error) {
 			console.log(error.message);
-			return res.status(500).json({ success: false, errors: [{ msg: 'Internal server error' }] });
+			return res.status(500).json({ errors: [{ msg: 'Internal server error' }] });
 		}
 	},
 
 	// [POST] /api/auth/reset-password/:id/:token
 	async resetPassword(req, res) {
 		const errors = validationResult(req);
-		if (!errors.isEmpty()) return res.status(400).json({ success: false, errors: errors.array() });
+		if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
 
 		const { id, token } = req.params;
 		const { password, confirmPassword } = req.body;
 
 		if (password !== confirmPassword)
-			return res
-				.status(400)
-				.json({ success: false, errors: [{ msg: 'Confirm password not match' }] });
+			return res.status(400).json({ errors: [{ msg: 'Confirm password not match' }] });
 
 		try {
 			// Hash password before saving to database
@@ -312,17 +286,16 @@ const AuthController = {
 			const user = await User.findById(id);
 
 			// User not found
-			if (!user)
-				return res.status(400).json({ success: false, errors: [{ msg: 'User not found' }] });
+			if (!user) return res.status(400).json({ errors: [{ msg: 'User not found' }] });
 
 			const secret = `${process.env.ACCESS_TOKEN_SECRET}${user.password}`;
 			await JWT.verify(token, secret);
 			await User.findByIdAndUpdate(id, { password: hashedPassword });
 
-			return res.json({ success: true, msg: 'Password was reset successfully' });
+			return res.json({ msg: 'Password was reset successfully' });
 		} catch (error) {
 			console.log(error.message);
-			return res.status(500).json({ success: false, errors: [{ msg: 'Internal server error' }] });
+			return res.status(500).json({ errors: [{ msg: 'Internal server error' }] });
 		}
 	},
 };

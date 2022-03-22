@@ -39,10 +39,10 @@ const OrderController = {
 					});
 
 				const pagination = { _page, _limit, _totalRows };
-				return res.json({ success: true, orders, pagination });
+				return res.json({ orders, pagination });
 			} catch (error) {
 				console.log(error);
-				return res.status(500).json({ success: false, errors: [{ msg: 'Internal server error' }] });
+				return res.status(500).json({ errors: [{ msg: 'Internal server error' }] });
 			}
 		}
 
@@ -60,10 +60,10 @@ const OrderController = {
 					select: 'firstName lastName',
 				},
 			});
-			return res.json({ success: true, orders });
+			return res.json({ orders });
 		} catch (error) {
 			console.log(error);
-			return res.status(500).json({ success: false, errors: [{ msg: 'Internal server error' }] });
+			return res.status(500).json({ errors: [{ msg: 'Internal server error' }] });
 		}
 	},
 };
