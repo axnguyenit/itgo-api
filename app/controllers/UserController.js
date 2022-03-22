@@ -17,6 +17,7 @@ const UserController = {
 			try {
 				const _totalRows = await User.find(query).count();
 				const users = await User.find(query)
+					.sort({ createdAt: -1 })
 					.limit(_limit)
 					.skip(skipDocs)
 					.select('firstName lastName email isInstructor emailVerified avatar position isBanned');
@@ -33,9 +34,9 @@ const UserController = {
 
 		// get all users
 		try {
-			const users = await User.find(query).select(
-				'firstName lastName email isInstructor emailVerified avatar position isBanned'
-			);
+			const users = await User.find(query)
+				.sort({ createdAt: -1 })
+				.select('firstName lastName email isInstructor emailVerified avatar position isBanned');
 			return res.json({ users });
 		} catch (error) {
 			console.log(error);
@@ -95,6 +96,7 @@ const UserController = {
 			try {
 				const _totalRows = await User.find(query).count();
 				const instructors = await User.find(query)
+					.sort({ createdAt: -1 })
 					.limit(_limit)
 					.skip(skipDocs)
 					.select('firstName lastName avatar position');
@@ -110,7 +112,9 @@ const UserController = {
 
 		// get all instructors
 		try {
-			const instructors = await User.find(query).select('firstName lastName avatar position email');
+			const instructors = await User.find(query)
+				.sort({ createdAt: -1 })
+				.select('firstName lastName avatar position email');
 			return res.json({ instructors });
 		} catch (error) {
 			console.log(error);

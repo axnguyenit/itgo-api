@@ -21,14 +21,69 @@ const eventController = {
 	async getByStudent(req, res) {
 		const { _id } = req.user;
 		const { id } = req.params;
-		console.log(_id);
 		try {
-			const classes = await Class.findOne({ students: [_id], course: id });
+			const classes = await Class.findOne({ students: { $in: [_id] }, course: id });
 			if (!classes) return res.status(403).json({ errors: [{ msg: 'Permission denied' }] });
 
 			const events = await Event.find({ course: id });
 
 			return res.json({ events });
+		} catch (error) {
+			console.log(error.message);
+			return res.status(500).json({ errors: [{ msg: 'Internal server error' }] });
+		}
+	},
+
+	// [GET] /api/events/valid-user/:id --> eventId
+	// Verify that the user can join meeting
+	async checkValidUser(req, res) {
+		try {
+			const { _id, firstName, lastName, email, isAdmin } = req.user;
+			const { id } = req.params;
+
+			const event = await Event.findById(id).populate({
+				path: 'course',
+				model: 'Course',
+				select: 'cover',
+			});
+
+			const { meetingNumber, passwordMeeting, course } = event;
+
+			if (_id === event.instructor || isAdmin) {
+				const name = `${firstName} ${lastName} - ${isAdmin ? 'Admin' : 'Instructor'}`;
+				return res.json({
+					meetingNumber,
+					passwordMeeting,
+					cover: event.course.cover,
+					role: 0,
+					name,
+					email,
+				});
+			}
+
+			const classes = await Class.findOne({ students: { $in: [_id] }, course: course })
+				.populate({
+					path: 'course',
+					model: 'Course',
+					select: 'cover',
+				})
+				.populate({
+					path: 'students',
+					model: 'User',
+					select: 'firstName lastName email',
+				});
+			if (!classes) return res.status(403).json({ errors: [{ msg: 'Permission denied' }] });
+			const user = classes.students.find((student) => student._id.toString() === _id);
+			const name = `${user.firstName} ${user.lastName}`;
+
+			return res.json({
+				meetingNumber,
+				passwordMeeting,
+				cover: classes.course.cover,
+				role: 0,
+				name,
+				email: user.email,
+			});
 		} catch (error) {
 			console.log(error.message);
 			return res.status(500).json({ errors: [{ msg: 'Internal server error' }] });
