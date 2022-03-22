@@ -11,7 +11,7 @@ router.get(
 	authorization.isInstructor,
 	eventController.getByInstructor
 );
-
+router.get('/valid-user/:id', verifyToken, eventController.checkValidUser); // id --> eventId
 router.get('/get-by-student/:id', verifyToken, eventController.getByStudent); // id --> courseId
 router.put('/:id', verifyToken, authorization.canUpdateEvent, eventController.update);
 router.delete('/:id', verifyToken, authorization.canUpdateEvent, eventController.destroy);

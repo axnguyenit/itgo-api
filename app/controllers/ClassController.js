@@ -1,7 +1,9 @@
 const Class = require('../models/Class');
+const mongoose = require('mongoose');
+const Event = require('../models/Event');
 
 const classController = {
-	// [GET] /api/classes/:id
+	// [GET] /api/classes/:id --> courseId
 	async getStudents(req, res) {
 		try {
 			const { id } = req.params;
