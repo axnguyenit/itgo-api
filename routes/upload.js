@@ -48,8 +48,6 @@ router.post('/avatar', verifyToken, upload.uploadAvatar.single('avatar'), (req, 
 	// if (images && images.length > 0)
 	// 	images.map((image) => fs.unlinkSync(`public/uploads/courses/${image}`));
 
-	console.log(file);
-
 	file.path = `${req.protocol}://${path.join(
 		req.headers.host,
 		'assets',

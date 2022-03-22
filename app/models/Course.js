@@ -29,11 +29,12 @@ const Course = new Schema(
 			min: 0,
 			default: 0,
 		},
-		// status: {
-		// 	type: String,
-		// 	required: true,
-		// 	trim: true,
-		// },
+		minStudent: {
+			type: Number,
+			min: 5,
+			required: true,
+			default: 5,
+		},
 		tags: [
 			{
 				type: String,

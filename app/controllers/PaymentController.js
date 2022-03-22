@@ -7,6 +7,7 @@ const Cart = require('../models/Cart');
 const CartItem = require('../models/CartItem');
 const OrderItem = require('../models/OrderItem');
 const Order = require('../models/Order');
+const Class = require('../models/Class');
 
 const paymentController = {
 	// [GET] /api/payment/url
@@ -15,8 +16,7 @@ const paymentController = {
 
 		try {
 			const cart = await Cart.findOne({ userId: _id });
-			if (!cart)
-				return res.status(404).json({ success: false, errors: [{ msg: 'Cart not found' }] });
+			if (!cart) return res.status(404).json({ errors: [{ msg: 'Cart not found' }] });
 
 			const cartItems = await CartItem.find({ cartId: cart._id }).populate({
 				path: 'course',
@@ -24,8 +24,7 @@ const paymentController = {
 				select: 'name price priceSale',
 			});
 
-			if (!cartItems.length)
-				return res.status(400).json({ success: false, errors: [{ msg: 'Cart is empty' }] });
+			if (!cartItems.length) return res.status(400).json({ errors: [{ msg: 'Cart is empty' }] });
 
 			const amount = cartItems.reduce(
 				(previous, current) =>
@@ -82,28 +81,26 @@ const paymentController = {
 			const request = https.request(options, (response) => {
 				response.setEncoding('utf8');
 				response.on('data', (body) => {
-					if (response.statusCode === 200)
-						return res.json({ success: true, payUrl: JSON.parse(body).payUrl });
+					if (response.statusCode === 200) return res.json({ payUrl: JSON.parse(body).payUrl });
 				});
 				response.on('end', () => {});
 			});
 			request.on('error', (error) => {
 				console.log(error);
-				return res.status(500).json({ success: false, errors: [{ msg: 'Internal server error' }] });
+				return res.status(500).json({ errors: [{ msg: 'Internal server error' }] });
 			});
 			request.write(requestBody);
 			request.end();
 		} catch (error) {
 			console.log(error);
-			return res.status(500).json({ success: false, errors: [{ msg: 'Internal server error' }] });
+			return res.status(500).json({ errors: [{ msg: 'Internal server error' }] });
 		}
 	},
 
 	// [POST] /api/payment
 	async store(req, res) {
 		const errors = validationResult(req);
-
-		if (!errors.isEmpty()) return res.status(400).json({ success: false, errors: errors.array() });
+		if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
 
 		const { _id } = req.user;
 		const { transId, message, amount, resultCode, cart } = req.body;
@@ -113,9 +110,7 @@ const paymentController = {
 				const paymentExist = await Payment.findOne({ transId });
 
 				if (paymentExist)
-					return res
-						.status(409)
-						.json({ success: false, errors: [{ msg: 'This transaction already exists' }] });
+					return res.status(409).json({ errors: [{ msg: 'This transaction already exists' }] });
 
 				const payment = new Payment({
 					userId: new mongoose.Types.ObjectId(_id),
@@ -144,13 +139,17 @@ const paymentController = {
 
 						await orderItem.save();
 						await CartItem.findByIdAndDelete(cartItem._id);
+						await Class.findOneAndUpdate(
+							{ course: cartItem.course._id },
+							{ $push: { students: new mongoose.Types.ObjectId(_id) } }
+						);
 					});
 				}
 
-				return res.json({ success: true, msg: 'Payment was created successfully' });
+				return res.json({ msg: 'Payment was created successfully' });
 			} catch (error) {
 				console.log(error);
-				return res.status(500).json({ success: false, errors: [{ msg: 'Internal server error' }] });
+				return res.status(500).json({ errors: [{ msg: 'Internal server error' }] });
 			}
 		}
 	},

@@ -7,6 +7,8 @@ const courseRouter = require('./courses');
 const userRouter = require('./users');
 const instructorRouter = require('./instructors');
 const paymentRouter = require('./payment');
+const classRouter = require('./classes');
+const eventRouter = require('./events');
 
 const routes = (app) => {
 	app.use('/api/auth', authRouter);
@@ -18,6 +20,8 @@ const routes = (app) => {
 	app.use('/api/upload', uploadRouter);
 	app.use('/api/instructors', instructorRouter);
 	app.use('/api/payment', paymentRouter);
+	app.use('/api/classes', classRouter);
+	app.use('/api/events', eventRouter);
 	app.use('/', (req, res) => res.render('index'));
 };
 
