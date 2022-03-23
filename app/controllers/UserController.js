@@ -1,4 +1,5 @@
 const { validationResult } = require('express-validator');
+const cloudinary = require('../../config/cloudinary');
 const User = require('../models/User');
 
 const UserController = {
@@ -70,8 +71,27 @@ const UserController = {
 
 		const { id } = req.params;
 
+		const { firstName, lastName, email, avatar, phoneNumber, address, region } = req.body;
+
 		try {
-			await User.findByIdAndUpdate(id, { ...req.body });
+			let newAvatar = '';
+			if (avatar.startsWith('data:')) {
+				const response = await cloudinary.uploader.upload(avatar, {
+					folder: 'itgo/avatar',
+					resource_type: 'image',
+				});
+				newAvatar = response.public_id;
+			}
+
+			await User.findByIdAndUpdate(id, {
+				firstName,
+				lastName,
+				email,
+				avatar: avatar.startsWith('data:') ? newAvatar : avatar,
+				phoneNumber,
+				address,
+				region,
+			});
 			return res.json({ msg: 'Account was updated successfully' });
 		} catch (error) {
 			console.log(error);
