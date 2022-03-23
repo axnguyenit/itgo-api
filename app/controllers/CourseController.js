@@ -8,6 +8,7 @@ const Review = require('../models/Review');
 const CartItem = require('../models/CartItem');
 const User = require('../models/User');
 const Class = require('../models/Class');
+const cloudinary = require('../../config/cloudinary');
 
 // ----------------------------------------------------------------------
 
@@ -94,6 +95,12 @@ const courseController = {
 		} = req.body;
 
 		try {
+			const response = await cloudinary.uploader.upload(cover, {
+				folder: 'itgo/courses',
+				resource_type: 'image',
+			});
+			const newCover = response.public_id;
+
 			const courseDetails = new CourseDetail({
 				overview,
 				requirements,
@@ -105,7 +112,7 @@ const courseController = {
 			const course = new Course({
 				instructor: new mongoose.Types.ObjectId(instructor),
 				name,
-				cover,
+				cover: newCover,
 				price,
 				priceSale,
 				minStudent,
@@ -185,10 +192,19 @@ const courseController = {
 		} = req.body;
 
 		try {
+			let newCover = '';
+			if (cover.startsWith('data:')) {
+				const response = await cloudinary.uploader.upload(cover, {
+					folder: 'itgo/courses',
+					resource_type: 'image',
+				});
+				newCover = response.public_id;
+			}
+
 			const course = await Course.findByIdAndUpdate(id, {
 				name,
 				instructor,
-				cover,
+				cover: cover.startsWith('data:') ? newCover : cover,
 				price,
 				priceSale,
 				minStudent,

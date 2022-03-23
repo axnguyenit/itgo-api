@@ -1,3 +1,4 @@
+require('dotenv').config();
 const path = require('path');
 const nodemailer = require('nodemailer');
 const hbs = require('nodemailer-express-handlebars');
@@ -5,8 +6,8 @@ const hbs = require('nodemailer-express-handlebars');
 const transporter = nodemailer.createTransport({
 	service: 'gmail',
 	auth: {
-		user: 'dinhkhakl01@gmail.com',
-		pass: 'uhrysobmkbklvgbl',
+		user: process.env.MAIL_USERNAME,
+		pass: process.env.MAIL_PASSWORD,
 	},
 });
 
