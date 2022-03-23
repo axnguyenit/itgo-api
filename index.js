@@ -24,12 +24,17 @@ app.engine('hbs', engine({ extname: '.hbs' }));
 app.set('views', path.join(__dirname, 'resources', 'views'));
 app.set('view engine', 'hbs');
 
-app.use(cors());
+app.use(
+	cors({
+		origin: '*',
+	})
+);
+
 app.use(helmet.crossOriginResourcePolicy({ policy: 'cross-origin' }));
 app.use(logger('dev'));
 // HTTP logger
 // app.use(logger('combined'));
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));

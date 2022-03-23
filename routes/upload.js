@@ -7,17 +7,9 @@ const upload = require('../utils/upload');
 
 router.post('/course-image', verifyToken, upload.uploadCourseImage.single('image'), (req, res) => {
 	const file = req.file;
-	if (!file)
-		return res.status(400).json({
-			success: false,
-			errors: [
-				{
-					msg: 'Image not found',
-				},
-			],
-		});
+	if (!file) return res.status(400).json({ errors: [{ msg: 'Image not found' }] });
 
-	file.path = `${req.protocol}://${path.join(
+	file.path = `${process.env.PROTOCOL}://${path.join(
 		req.headers.host,
 		'assets',
 		'images',
@@ -25,30 +17,19 @@ router.post('/course-image', verifyToken, upload.uploadCourseImage.single('image
 		file.filename
 	)}`;
 
-	return res.json({
-		success: true,
-		file,
-	});
+	return res.json({ file });
 });
 
 // ----------------------------------------------------------------------
 
 router.post('/avatar', verifyToken, upload.uploadAvatar.single('avatar'), (req, res) => {
 	const file = req.file;
-	if (!file)
-		return res.status(400).json({
-			success: false,
-			errors: [
-				{
-					msg: 'Image not found',
-				},
-			],
-		});
+	if (!file) return res.status(400).json({ errors: [{ msg: 'Image not found' }] });
 
 	// if (images && images.length > 0)
 	// 	images.map((image) => fs.unlinkSync(`public/uploads/courses/${image}`));
 
-	file.path = `${req.protocol}://${path.join(
+	file.path = `${process.env.PROTOCOL}://${path.join(
 		req.headers.host,
 		'assets',
 		'images',
@@ -57,10 +38,7 @@ router.post('/avatar', verifyToken, upload.uploadAvatar.single('avatar'), (req, 
 	)}`;
 
 	// images = [file.filename];
-	return res.json({
-		success: true,
-		file,
-	});
+	return res.json({ file });
 });
 
 module.exports = router;
