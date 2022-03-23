@@ -1,22 +1,22 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
-const Order = new Schema(
+const Review = new Schema(
 	{
-		userId: {
+		user: {
+			type: Schema.Types.ObjectId,
+			required: true,
+			ref: 'User',
+		},
+		comment: {
 			type: String,
 			required: true,
 			trim: true,
 		},
-		total: {
+		rating: {
 			type: Number,
 			required: true,
-			min: 0,
-		},
-		paymentId: {
-			type: Schema.Types.ObjectId,
-			required: true,
-			ref: 'Payment',
+			min: 1,
 		},
 	},
 	{
@@ -24,4 +24,4 @@ const Order = new Schema(
 	}
 );
 
-module.exports = mongoose.model('Order', Order);
+module.exports = mongoose.model('Review', Review);

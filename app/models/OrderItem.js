@@ -1,22 +1,26 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
-const Order = new Schema(
+const OrderItem = new Schema(
 	{
+		orderId: {
+			type: String,
+			required: true,
+			trim: true,
+		},
 		userId: {
 			type: String,
 			required: true,
 			trim: true,
 		},
-		total: {
+		course: {
+			type: Schema.Types.ObjectId,
+			ref: 'Course',
+		},
+		price: {
 			type: Number,
 			required: true,
 			min: 0,
-		},
-		paymentId: {
-			type: Schema.Types.ObjectId,
-			required: true,
-			ref: 'Payment',
 		},
 	},
 	{
@@ -24,4 +28,4 @@ const Order = new Schema(
 	}
 );
 
-module.exports = mongoose.model('Order', Order);
+module.exports = mongoose.model('OrderItem', OrderItem);

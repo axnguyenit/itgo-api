@@ -1,10 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const orderController = require('../app/controllers/OrderController');
-const validator = require('../validator/orders');
-const authToken = require('../app/middleware/auth');
+const verifyToken = require('../app/middleware/authentication');
+const authorization = require('../app/middleware/authorization');
 
-router.get('/:userId', authToken, orderController.show);
-router.put('/:id', validator.validateOrder, authToken, orderController.update);
+router.get('/my-orders', verifyToken, orderController.getByUser);
+router.get('/:id', verifyToken, orderController.show);
+router.get('/', verifyToken, authorization.isAdmin, orderController.index);
 
 module.exports = router;

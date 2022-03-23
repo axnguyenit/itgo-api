@@ -1,55 +1,71 @@
-const { validationResult } = require('express-validator');
 const Order = require('../models/Order');
+const OrderItem = require('../models/OrderItem');
 
-class OrderController {
-	// [GET] /api/orders/:userId --> Display the specified resource.
-	async show(req, res) {
-		const { userId } = req.params;
+const OrderController = {
+	// [GET] /api/orders
+	async index(req, res) {},
+
+	// [GET] /api/orders/:id
+	async show(req, res) {},
+
+	// [GET] /api/orders/my-orders
+	async getByUser(req, res) {
+		let _page = parseInt(req.query._page);
+		let _limit = parseInt(req.query._limit);
+		const { _id } = req.user;
+		const query = { userId: _id };
+
+		// get orders base on _page and _limit per _page
+		if (_page) {
+			_page = _page >= 0 ? _page : 1;
+			_limit = _limit || 1;
+			_limit = _limit >= 0 ? _limit : 1;
+			const skipDocs = (_page - 1) * _limit;
+
+			try {
+				const _totalRows = await OrderItem.find(query).count();
+				const orders = await OrderItem.find(query)
+					.limit(_limit)
+					.skip(skipDocs)
+					.populate({
+						path: 'course',
+						model: 'Course',
+						select: 'name cover instructor',
+						populate: {
+							path: 'instructor',
+							model: 'User',
+							select: 'firstName lastName',
+						},
+					});
+
+				const pagination = { _page, _limit, _totalRows };
+				return res.json({ orders, pagination });
+			} catch (error) {
+				console.log(error);
+				return res.status(500).json({ errors: [{ msg: 'Internal server error' }] });
+			}
+		}
+
+		// ----------------------------------------------------------------------
+
+		// get all orders
 		try {
-			const order = await Order.findOne({ userId });
-			if (!order)
-				return res.json({
-					msg: 'User ID is invalid.',
-				});
-			return res.json(order);
-		} catch (error) {
-			return res.json(error);
-		}
-	}
-
-	// [PUT] /api/orders/:id --> Update the specified resource in storage.
-	async update(req, res) {
-		const errors = validationResult(req);
-
-		if (!errors.isEmpty()) {
-			return res.status(400).json({
-				errors: errors.array(),
+			const orders = await OrderItem.find(query).populate({
+				path: 'course',
+				model: 'Course',
+				select: 'name cover instructor',
+				populate: {
+					path: 'instructor',
+					model: 'User',
+					select: 'firstName lastName',
+				},
 			});
-		}
-
-		const { id } = req.params;
-		const { items } = req.body;
-
-		try {
-			const order = await Order.findById(id);
-			if (!order) return;
-
-			const enrolledCourse = items.find((item) => {
-				return order.items.find((item2) => Object.values(item).includes(item2.courseId));
-			});
-
-			if (enrolledCourse)
-				return res.json({
-					enrolledCourse,
-					msg: 'This course is enrolled',
-				});
-			const newItems = [...order.items, ...items];
-			await Order.updateOne({ _id: id }, { items: newItems });
-			return res.json({ msg: 'Updated' });
+			return res.json({ orders });
 		} catch (error) {
-			return res.json(error);
+			console.log(error);
+			return res.status(500).json({ errors: [{ msg: 'Internal server error' }] });
 		}
-	}
-}
+	},
+};
 
-module.exports = new OrderController();
+module.exports = OrderController;

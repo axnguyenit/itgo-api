@@ -1,6 +1,5 @@
-var mongoose = require('mongoose');
-
-const Schema = mongoose.Schema;
+const mongoose = require('mongoose');
+const { Schema } = mongoose;
 
 const Cart = new Schema(
 	{
@@ -8,14 +7,6 @@ const Cart = new Schema(
 			type: String,
 			required: true,
 			trim: true,
-			unique: true,
-		},
-		totalCost: {
-			type: Number,
-			default: 0,
-		},
-		items: {
-			type: Array,
 		},
 	},
 	{

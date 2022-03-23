@@ -3,31 +3,54 @@ const express = require('express');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
-
 const cors = require('cors');
+const helmet = require('helmet');
+const { engine } = require('express-handlebars');
 const dotenv = require('dotenv');
 const bodyParser = require('body-parser');
-const db = require('./config/db');
+const database = require('./config/database');
 const routes = require('./routes');
+// const fs = require('fs');
+// const swaggerUI = require('swagger-ui-express');
+// const swaggerJSDoc = require('swagger-jsdoc');
 
 dotenv.config();
 
 const app = express();
-app.use(cors());
 
+// view engine setup
+
+app.engine('hbs', engine({ extname: '.hbs' }));
+app.set('views', path.join(__dirname, 'resources', 'views'));
+app.set('view engine', 'hbs');
+
+app.use(cors());
+app.use(helmet.crossOriginResourcePolicy({ policy: 'cross-origin' }));
 app.use(logger('dev'));
 // HTTP logger
 // app.use(logger('combined'));
-app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Connect db
-db.connect();
+// connect database
+database.connect();
 
-// public dir
-app.use(express.static(path.join(__dirname, 'public')));
+// Swagger configuration
+// const swaggerOptions = {
+// 	swaggerDefinition: {
+// 		openapi: '3.0.0',
+// 		info: {
+// 			title: 'ITGO API',
+// 			version: '1.0.0',
+// 		},
+// 	},
+// 	apis: ['./routes/*.js'],
+// };
+
+// const swaggerDocs = swaggerJSDoc(swaggerOptions);
+// app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerDocs));
 
 // init router
 routes(app);
