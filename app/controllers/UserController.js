@@ -63,6 +63,25 @@ const UserController = {
 		}
 	},
 
+	// [GET] /api/users/:id
+	async show(req, res) {
+		const { id } = req.params;
+
+		try {
+			const user = await User.findById(id).select(
+				'firstName lastName avatar position address region'
+			);
+
+			// user not found
+			if (!user) return res.status(400).json({ errors: [{ msg: 'User not found' }] });
+
+			return res.json({ user });
+		} catch (error) {
+			console.error(error);
+			return res.status(500).json({ errors: [{ msg: 'Internal server error' }] });
+		}
+	},
+
 	// [PUT] /api/users/:id
 	async updateAccount(req, res) {
 		const errors = validationResult(req);

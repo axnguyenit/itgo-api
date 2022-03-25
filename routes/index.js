@@ -8,6 +8,7 @@ const instructorRouter = require('./instructors');
 const paymentRouter = require('./payment');
 const classRouter = require('./classes');
 const eventRouter = require('./events');
+const roadmapRouter = require('./roadmaps');
 
 const routes = (app) => {
 	app.use('/api/auth', authRouter);
@@ -20,6 +21,7 @@ const routes = (app) => {
 	app.use('/api/payment', paymentRouter);
 	app.use('/api/classes', classRouter);
 	app.use('/api/events', eventRouter);
+	app.use('/api/roadmap', roadmapRouter);
 	app.use('/', (req, res) => res.render('index'));
 };
 
