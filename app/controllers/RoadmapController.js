@@ -61,9 +61,9 @@ const roadmapController = {
 		if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
 
 		try {
-			const { name, description, technologies } = req.body;
+			const { name, slogan, description, technologies } = req.body;
 
-			const roadmap = new Roadmap({ name, description });
+			const roadmap = new Roadmap({ name, slogan, description });
 			await roadmap.save();
 
 			technologies.map(async (technology) => {
@@ -90,10 +90,10 @@ const roadmapController = {
 		if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
 
 		const { id } = req.params;
-		const { name, description, technologies } = req.body;
+		const { name, slogan, description, technologies } = req.body;
 
 		try {
-			const roadmap = await Roadmap.findByIdAndUpdate(id, { name, description });
+			const roadmap = await Roadmap.findByIdAndUpdate(id, { name, slogan, description });
 			if (!roadmap) return res.status(400).json({ errors: [{ msg: 'Roadmap not found' }] });
 
 			technologies.map(async (_technology) => {

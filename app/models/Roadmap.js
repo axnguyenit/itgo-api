@@ -8,6 +8,11 @@ const Roadmap = new Schema(
 			trim: true,
 			required: true,
 		},
+		slogan: {
+			type: String,
+			trim: true,
+			required: true,
+		},
 		description: {
 			type: String,
 			trim: true,
