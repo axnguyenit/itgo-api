@@ -1,8 +1,6 @@
 const Class = require('../models/Class');
-const mongoose = require('mongoose');
-const Event = require('../models/Event');
 
-const classController = {
+const ClassController = {
 	// [GET] /api/classes/:id --> courseId
 	async getStudents(req, res) {
 		try {
@@ -21,4 +19,4 @@ const classController = {
 	},
 };
 
-module.exports = classController;
+module.exports = ClassController;

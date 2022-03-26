@@ -1,7 +1,5 @@
 const { validationResult } = require('express-validator');
 const mongoose = require('mongoose');
-const path = require('path');
-const fs = require('fs');
 const Course = require('../models/Course');
 const CourseDetail = require('../models/CourseDetail');
 const Review = require('../models/Review');
@@ -12,12 +10,12 @@ const cloudinary = require('../../config/cloudinary');
 
 // ----------------------------------------------------------------------
 
-const courseController = {
+const CourseController = {
 	// [GET] /api/courses
 	async index(req, res) {
 		let _page = parseInt(req.query._page);
 		let _limit = parseInt(req.query._limit);
-		const _instructor = req.query._instructor;
+		const { _tags, _instructor } = req.query;
 		let query = {};
 
 		if (_instructor) {
@@ -32,6 +30,8 @@ const courseController = {
 				return res.status(500).json({ errors: [{ msg: 'Internal server error' }] });
 			}
 		}
+
+		if (_tags) query = { ...query, tags: { $regex: _tags, $options: 'i' } };
 
 		// get courses base on _page and _limit per _page
 		if (_page) {
@@ -230,14 +230,11 @@ const courseController = {
 		try {
 			const course = await Course.findByIdAndDelete(id);
 
-			const { base } = path.parse(course.cover);
-			fs.unlinkSync(path.join('public', 'assets', 'images', 'courses', base));
-
 			const courseDetails = await CourseDetail.findByIdAndDelete(course.details);
 			courseDetails.reviews.map(async (review) => await Review.findByIdAndDelete(review));
 
-			await CartItem.deleteMany({ course: course._id });
-			await Class.findOneAndRemove({ course: course._id });
+			await CartItem.deleteMany({ course: id });
+			await Class.findOneAndRemove({ course: id });
 
 			return res.json({ msg: 'Course was removed successfully' });
 		} catch (error) {
@@ -247,4 +244,4 @@ const courseController = {
 	},
 };
 
-module.exports = courseController;
+module.exports = CourseController;

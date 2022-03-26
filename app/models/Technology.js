@@ -1,29 +1,25 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
-const Model = new Schema(
+const Technology = new Schema(
 	{
 		name: {
 			type: String,
+			trim: true,
 			required: true,
-			unique: true,
-		},
-		description: {
-			type: String,
-			default: '',
 		},
 		image: {
 			type: String,
-			default: '',
+			trim: true,
+			required: true,
 		},
-		videoId: {
+		tag: {
 			type: String,
+			trim: true,
 			required: true,
 		},
 	},
-	{
-		timestamps: true,
-	}
+	{ timestamps: true }
 );
 
-module.exports = mongoose.model('Model', Model);
+module.exports = mongoose.model('Technology', Technology);

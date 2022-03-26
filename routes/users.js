@@ -14,6 +14,7 @@ router.put(
 );
 router.put('/ban-user/:id', verifyToken, authorization.isAdmin, userController.banUser);
 router.get('/my-account', verifyToken, userController.myAccount);
+router.get('/user/:id', verifyToken, userController.show);
 router.get('/', verifyToken, authorization.isAdmin, userController.index);
 
 module.exports = router;

@@ -49,7 +49,7 @@ const AuthController = {
 			const mailOptions = {
 				from: 'ITGO',
 				to: email,
-				subject: 'ITGO - Request to verify email',
+				subject: 'ITGO - Verify email',
 				template: 'verify-email',
 				context: {
 					firstName: newUser.firstName,
@@ -154,7 +154,7 @@ const AuthController = {
 			const mailOptions = {
 				from: 'ITGO',
 				to: email,
-				subject: 'ITGO - Request to verify email',
+				subject: 'ITGO - Verify email',
 				template: 'verify-email',
 				context: {
 					firstName: user.firstName,
@@ -222,7 +222,7 @@ const AuthController = {
 			const mailOptions = {
 				from: 'ITGO',
 				to: email,
-				subject: 'ITGO - Request to reset password',
+				subject: 'ITGO - Reset password',
 				template: 'reset-password',
 				context: {
 					firstName: user.firstName,
