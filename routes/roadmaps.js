@@ -8,6 +8,7 @@ const router = express.Router();
 
 router.get('/:id', roadmapController.show);
 router.put('/:id', verifyToken, authorization.isAdmin, validator.roadmap, roadmapController.update);
+router.delete('/:id', verifyToken, authorization.isAdmin, roadmapController.destroy);
 router.post('/', verifyToken, authorization.isAdmin, validator.roadmap, roadmapController.store);
 router.get('/', roadmapController.index);
 

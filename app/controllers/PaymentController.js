@@ -9,8 +9,8 @@ const OrderItem = require('../models/OrderItem');
 const Order = require('../models/Order');
 const Class = require('../models/Class');
 
-const paymentController = {
-	// [GET] /api/payment/url
+const PaymentController = {
+	// [GET] /api/payments/url
 	async getPayUrl(req, res) {
 		const { _id } = req.user;
 
@@ -97,7 +97,7 @@ const paymentController = {
 		}
 	},
 
-	// [POST] /api/payment
+	// [POST] /api/payments
 	async store(req, res) {
 		const errors = validationResult(req);
 		if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
@@ -155,4 +155,4 @@ const paymentController = {
 	},
 };
 
-module.exports = paymentController;
+module.exports = PaymentController;

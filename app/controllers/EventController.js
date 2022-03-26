@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const Class = require('../models/Class');
 const Event = require('../models/Event');
 
-const eventController = {
+const EventController = {
 	// [GET] /api/events/get-by-instructor
 	async getByInstructor(req, res) {
 		const { _id } = req.user;
@@ -163,4 +163,4 @@ const eventController = {
 	},
 };
 
-module.exports = eventController;
+module.exports = EventController;

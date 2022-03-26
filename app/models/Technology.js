@@ -1,19 +1,9 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
-const RoadmapDetail = new Schema(
+const Technology = new Schema(
 	{
-		roadmapId: {
-			type: String,
-			trim: true,
-			required: true,
-		},
-		technology: {
-			type: String,
-			trim: true,
-			required: true,
-		},
-		description: {
+		name: {
 			type: String,
 			trim: true,
 			required: true,
@@ -32,4 +22,4 @@ const RoadmapDetail = new Schema(
 	{ timestamps: true }
 );
 
-module.exports = mongoose.model('RoadmapDetail', RoadmapDetail);
+module.exports = mongoose.model('Technology', Technology);
