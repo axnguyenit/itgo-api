@@ -12,6 +12,12 @@ router.put(
 	validator.technology,
 	technologyController.update
 );
+router.get(
+	'/:id',
+	authentication.verifyAccessToken,
+	authorization.isAdmin,
+	technologyController.show
+);
 router.delete(
 	'/:id',
 	authentication.verifyAccessToken,
@@ -23,7 +29,7 @@ router.post(
 	authentication.verifyAccessToken,
 	authorization.isAdmin,
 	validator.technology,
-	technologyController.show
+	technologyController.store
 );
 router.get('/', technologyController.index);
 
