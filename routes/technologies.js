@@ -1,21 +1,26 @@
 const express = require('express');
 const technologyController = require('../app/controllers/TechnologyController');
-const verifyToken = require('../app/middleware/authentication');
+const authentication = require('../app/middleware/authentication');
 const authorization = require('../app/middleware/authorization');
 const validator = require('../validator/technology');
 const router = express.Router();
 
 router.put(
 	'/:id',
-	verifyToken,
+	authentication.verifyAccessToken,
 	authorization.isAdmin,
 	validator.technology,
 	technologyController.update
 );
-router.delete('/:id', verifyToken, authorization.isAdmin, technologyController.destroy);
+router.delete(
+	'/:id',
+	authentication.verifyAccessToken,
+	authorization.isAdmin,
+	technologyController.destroy
+);
 router.post(
 	'/',
-	verifyToken,
+	authentication.verifyAccessToken,
 	authorization.isAdmin,
 	validator.technology,
 	technologyController.show
