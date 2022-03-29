@@ -10,6 +10,7 @@ const classRouter = require('./classes');
 const eventRouter = require('./events');
 const roadmapRouter = require('./roadmaps');
 const technologyRouter = require('./technologies');
+const applicationRouter = require('./applications');
 
 const routes = (app) => {
 	app.use('/api/auth', authRouter);
@@ -24,6 +25,7 @@ const routes = (app) => {
 	app.use('/api/events', eventRouter);
 	app.use('/api/roadmaps', roadmapRouter);
 	app.use('/api/technologies', technologyRouter);
+	app.use('/api/applications', applicationRouter);
 	app.use('/', (req, res) => res.render('index'));
 };
 
