@@ -51,7 +51,7 @@ const UserController = {
 		const { _id } = req.user;
 		try {
 			const user = await User.findById(_id).select(
-				'firstName lastName email isAdmin isInstructor emailVerified avatar address phoneNumber region'
+				'firstName lastName email isAdmin isInstructor emailVerified avatar address phoneNumber region isApply'
 			);
 
 			// user not found

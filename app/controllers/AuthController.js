@@ -106,6 +106,7 @@ const AuthController = {
 				address,
 				phoneNumber,
 				region,
+				isApply,
 			} = user;
 
 			// Send JWT access token
@@ -130,13 +131,14 @@ const AuthController = {
 					firstName,
 					lastName,
 					isAdmin,
-					isInstructor,
 					email,
-					emailVerified,
 					avatar,
-					address,
-					phoneNumber,
 					region,
+					address,
+					isApply,
+					phoneNumber,
+					isInstructor,
+					emailVerified,
 				},
 				accessToken,
 				refreshToken,

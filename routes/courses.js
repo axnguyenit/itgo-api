@@ -2,26 +2,21 @@ const express = require('express');
 const router = express.Router();
 const courseController = require('../app/controllers/CourseController');
 const validator = require('../validator/courses');
-const authentication = require('../app/middleware/authentication');
+const { verifyAccessToken } = require('../app/middleware/authentication');
 const authorization = require('../app/middleware/authorization');
 
 router.get('/:id', courseController.show);
 router.put(
 	'/:id',
-	authentication.verifyAccessToken,
+	verifyAccessToken,
 	authorization.canUpdateCourse,
 	validator.course,
 	courseController.update
 );
-router.delete(
-	'/:id',
-	authentication.verifyAccessToken,
-	authorization.canUpdateCourse,
-	courseController.destroy
-);
+router.delete('/:id', verifyAccessToken, authorization.canUpdateCourse, courseController.destroy);
 router.post(
 	'/',
-	authentication.verifyAccessToken,
+	verifyAccessToken,
 	authorization.canCreateCourse,
 	validator.course,
 	courseController.store
