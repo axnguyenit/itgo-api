@@ -2,11 +2,10 @@ const express = require('express');
 const router = express.Router();
 const cartController = require('../app/controllers/CartController');
 const validator = require('../validator/carts');
-const verifyToken = require('../app/middleware/authentication');
-// const authorization = require('../app/middleware/authorization');
+const { verifyAccessToken } = require('../app/middleware/authentication');
 
-router.get('/', verifyToken, cartController.show);
-router.delete('/:cartItemId', verifyToken, cartController.removeItem);
-router.post('/', verifyToken, validator.cartStore, cartController.store);
+router.get('/', verifyAccessToken, cartController.show);
+router.delete('/:cartItemId', verifyAccessToken, cartController.removeItem);
+router.post('/', verifyAccessToken, validator.cartStore, cartController.store);
 
 module.exports = router;

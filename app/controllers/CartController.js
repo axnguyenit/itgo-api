@@ -30,8 +30,8 @@ const CartController = {
 			}
 
 			// Instructor can not add their courses to cart
-			const myCourse = await Course.findOne({ instructor: _id });
-			if (myCourse)
+			const isAuthor = course.instructor?.toString() === _id;
+			if (isAuthor)
 				return res.status(400).json({ errors: [{ msg: 'You can not add your course to cart' }] });
 
 			// User can not add a enrolled course

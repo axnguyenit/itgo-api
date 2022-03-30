@@ -65,6 +65,11 @@ const User = new Schema(
 			required: true,
 			default: false,
 		},
+		isApply: {
+			type: Boolean,
+			required: true,
+			default: false,
+		},
 		isBanned: {
 			type: Boolean,
 			default: false,

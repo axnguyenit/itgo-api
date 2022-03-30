@@ -43,8 +43,13 @@ const resetPassword = [
 ];
 
 const changePassword = [
-	check('password', 'Password is required').notEmpty(),
-	check('password', 'Password must be at least 6 characters').isLength({ min: 6 }),
+	check('oldPassword', 'Old password is required').notEmpty(),
+	check('newPassword', 'New password is required').notEmpty(),
+	check('newPassword', 'New password must be at least 6 characters').isLength({ min: 6 }),
+	check('confirmNewPassword', 'Confirm new password is required').notEmpty(),
+	check('confirmNewPassword', 'Confirm new password must be at least 6 characters').isLength({
+		min: 6,
+	}),
 ];
 
 const validator = {

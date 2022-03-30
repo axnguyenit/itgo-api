@@ -1,23 +1,21 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
-const Model = new Schema(
+const Application = new Schema(
 	{
-		name: {
+		user: {
 			type: String,
+			trim: true,
 			required: true,
-			unique: true,
 		},
-		description: {
+		position: {
 			type: String,
-			default: '',
+			trim: true,
+			required: true,
 		},
-		image: {
+		cv: {
 			type: String,
-			default: '',
-		},
-		videoId: {
-			type: String,
+			trim: true,
 			required: true,
 		},
 	},
@@ -26,4 +24,4 @@ const Model = new Schema(
 	}
 );
 
-module.exports = mongoose.model('Model', Model);
+module.exports = mongoose.model('Application', Application);

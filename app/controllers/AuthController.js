@@ -24,7 +24,7 @@ const AuthController = {
 			}
 
 			if (password !== confirmPassword)
-				return res.status(400).json({ errors: [{ msg: 'Confirm password not match' }] });
+				return res.status(401).json({ errors: [{ msg: 'Confirm password not match' }] });
 
 			// Hash password before saving to database
 			const salt = await bcrypt.genSalt(10);
@@ -49,7 +49,7 @@ const AuthController = {
 			const mailOptions = {
 				from: 'ITGO',
 				to: email,
-				subject: 'ITGO - Request to verify email',
+				subject: 'ITGO - Verify email',
 				template: 'verify-email',
 				context: {
 					firstName: newUser.firstName,
@@ -59,7 +59,7 @@ const AuthController = {
 
 			await transporter.sendMail(mailOptions, function (error, info) {
 				if (error) {
-					console.log(error.message);
+					console.error(error.message);
 					return res.status(500).json({ errors: [{ msg: 'Internal server error' }] });
 				} else {
 					return res.json({
@@ -71,7 +71,7 @@ const AuthController = {
 
 			return res.json({ msg: 'Registered an account successfully' });
 		} catch (error) {
-			console.log(error.message);
+			console.error(error.message);
 			return res.status(500).json({ errors: [{ msg: 'Internal server error' }] });
 		}
 	},
@@ -93,7 +93,7 @@ const AuthController = {
 			const isMatch = await bcrypt.compareSync(password, user.password);
 
 			if (!isMatch)
-				return res.status(401).json({ errors: [{ msg: 'Email or password is invalid.' }] });
+				return res.status(401).json({ errors: [{ msg: 'Email or password is invalid' }] });
 
 			const {
 				_id,
@@ -106,13 +106,23 @@ const AuthController = {
 				address,
 				phoneNumber,
 				region,
+				isApply,
 			} = user;
 
 			// Send JWT access token
 			const accessToken = await JWT.sign(
 				{ _id, firstName, lastName, email, isAdmin, isInstructor },
 				process.env.ACCESS_TOKEN_SECRET,
-				{ expiresIn: '12h' }
+				{ expiresIn: '3h' }
+			);
+
+			// Refresh token
+			const refreshToken = await JWT.sign(
+				{ _id, firstName, lastName, email },
+				process.env.REFRESH_TOKEN_SECRET,
+				{
+					expiresIn: '7d',
+				}
 			);
 
 			return res.json({
@@ -121,18 +131,20 @@ const AuthController = {
 					firstName,
 					lastName,
 					isAdmin,
-					isInstructor,
 					email,
-					emailVerified,
 					avatar,
-					address,
-					phoneNumber,
 					region,
+					address,
+					isApply,
+					phoneNumber,
+					isInstructor,
+					emailVerified,
 				},
 				accessToken,
+				refreshToken,
 			});
 		} catch (error) {
-			console.log(error);
+			console.error(error);
 			return res.status(500).json({ errors: [{ msg: 'Internal server error' }] });
 		}
 	},
@@ -154,7 +166,7 @@ const AuthController = {
 			const mailOptions = {
 				from: 'ITGO',
 				to: email,
-				subject: 'ITGO - Request to verify email',
+				subject: 'ITGO - Verify email',
 				template: 'verify-email',
 				context: {
 					firstName: user.firstName,
@@ -164,7 +176,7 @@ const AuthController = {
 
 			await transporter.sendMail(mailOptions, function (error, info) {
 				if (error) {
-					console.log(error);
+					console.error(error);
 					return res.status(500).json({ errors: [{ msg: 'Internal server error' }] });
 				} else {
 					return res.json({
@@ -174,7 +186,7 @@ const AuthController = {
 				}
 			});
 		} catch (error) {
-			console.log(error.message);
+			console.error(error.message);
 			return res.status(500).json({ errors: [{ msg: 'Internal server error' }] });
 		}
 	},
@@ -197,7 +209,7 @@ const AuthController = {
 
 			return res.json({});
 		} catch (error) {
-			console.log(error.message);
+			console.error(error.message);
 			return res.status(500).json({ errors: [{ msg: 'Internal server error' }] });
 		}
 	},
@@ -222,7 +234,7 @@ const AuthController = {
 			const mailOptions = {
 				from: 'ITGO',
 				to: email,
-				subject: 'ITGO - Request to reset password',
+				subject: 'ITGO - Reset password',
 				template: 'reset-password',
 				context: {
 					firstName: user.firstName,
@@ -233,7 +245,7 @@ const AuthController = {
 
 			await transporter.sendMail(mailOptions, function (error, info) {
 				if (error) {
-					console.log(error);
+					console.error(error);
 					return res.status(500).json({ errors: [{ msg: 'Internal server error' }] });
 				} else {
 					return res.json({
@@ -243,7 +255,7 @@ const AuthController = {
 				}
 			});
 		} catch (error) {
-			console.log(error.message);
+			console.error(error.message);
 			return res.status(500).json({ errors: [{ msg: 'Internal server error' }] });
 		}
 	},
@@ -263,7 +275,7 @@ const AuthController = {
 
 			return res.json({});
 		} catch (error) {
-			console.log(error.message);
+			console.error(error.message);
 			return res.status(500).json({ errors: [{ msg: 'Internal server error' }] });
 		}
 	},
@@ -294,7 +306,38 @@ const AuthController = {
 
 			return res.json({ msg: 'Password was reset successfully' });
 		} catch (error) {
-			console.log(error.message);
+			console.error(error.message);
+			return res.status(500).json({ errors: [{ msg: 'Internal server error' }] });
+		}
+	},
+
+	// [POST] /api/auth/refresh-token
+	// create new access token from refresh token
+	async refreshToken(req, res) {
+		const { _id, firstName, lastName, email } = req.user;
+
+		try {
+			const user = await User.findById(_id);
+			// user not found
+			if (!user) return res.status(400).json({ errors: [{ msg: 'User do not exist' }] });
+
+			// Send JWT access token
+			const accessToken = await JWT.sign(
+				{
+					_id,
+					firstName,
+					lastName,
+					email,
+					isAdmin: user.isAdmin,
+					isInstructor: user.isInstructor,
+				},
+				process.env.ACCESS_TOKEN_SECRET,
+				{ expiresIn: '3h' }
+			);
+
+			return res.json({ accessToken });
+		} catch (error) {
+			console.error(error.message);
 			return res.status(500).json({ errors: [{ msg: 'Internal server error' }] });
 		}
 	},

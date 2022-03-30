@@ -9,8 +9,8 @@ const OrderItem = require('../models/OrderItem');
 const Order = require('../models/Order');
 const Class = require('../models/Class');
 
-const paymentController = {
-	// [GET] /api/payment/url
+const PaymentController = {
+	// [GET] /api/payments/url
 	async getPayUrl(req, res) {
 		const { _id } = req.user;
 
@@ -97,7 +97,7 @@ const paymentController = {
 		}
 	},
 
-	// [POST] /api/payment
+	// [POST] /api/payments
 	async store(req, res) {
 		const errors = validationResult(req);
 		if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
@@ -148,11 +148,11 @@ const paymentController = {
 
 				return res.json({ msg: 'Payment was created successfully' });
 			} catch (error) {
-				console.log(error);
+				console.log(error.message);
 				return res.status(500).json({ errors: [{ msg: 'Internal server error' }] });
 			}
 		}
 	},
 };
 
-module.exports = paymentController;
+module.exports = PaymentController;
