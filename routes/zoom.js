@@ -1,8 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const crypto = require('crypto');
+const { verifyAccessToken } = require('../app/middleware/authentication');
 
-router.post('/', (req, res) => {
+router.post('/', verifyAccessToken, (req, res) => {
 	const { meetingNumber, role } = req.body;
 	const timestamp = new Date().getTime() - 30000;
 	const msg = Buffer.from(
