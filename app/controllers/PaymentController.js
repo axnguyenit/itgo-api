@@ -148,7 +148,7 @@ const PaymentController = {
 
 				return res.json({ msg: 'Payment was created successfully' });
 			} catch (error) {
-				console.log(error);
+				console.log(error.message);
 				return res.status(500).json({ errors: [{ msg: 'Internal server error' }] });
 			}
 		}

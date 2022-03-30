@@ -163,7 +163,7 @@ const UserController = {
 					.sort({ createdAt: -1 })
 					.limit(_limit)
 					.skip(skipDocs)
-					.select('firstName lastName avatar position');
+					.select('firstName lastName avatar position email isInstructor emailVerified isBanned');
 
 				const pagination = { _page, _limit, _totalRows };
 
@@ -178,7 +178,7 @@ const UserController = {
 		try {
 			const instructors = await User.find(query)
 				.sort({ createdAt: -1 })
-				.select('firstName lastName avatar position email');
+				.select('firstName lastName avatar position email isInstructor emailVerified isBanned');
 			return res.json({ instructors });
 		} catch (error) {
 			console.log(error);
