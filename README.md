@@ -6,4 +6,4 @@
 - Install Dependencies ( yarn )
 - Start Server ( yarn start || yarn dev )
 
-# [ITGO UI](https://github.com/khanguyen01it/itgo-ui)
+# [ITGO UI](https://github.com/khanguyen01it/itgo-ui-react-typescript)
