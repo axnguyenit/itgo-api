@@ -12,10 +12,10 @@ const Class = require('../models/Class');
 const PaymentController = {
 	// [GET] /api/payments/url
 	async getPayUrl(req, res) {
-		const { _id } = req.user;
+		const { id: userId } = req.user;
 
 		try {
-			const cart = await Cart.findOne({ userId: _id });
+			const cart = await Cart.findOne({ userId });
 			if (!cart) return res.status(404).json({ errors: [{ msg: 'Cart not found' }] });
 
 			const cartItems = await CartItem.find({ cartId: cart._id }).populate({
@@ -39,7 +39,7 @@ const PaymentController = {
 
 			const partnerCode = process.env.MOMO_PARTNER_CODE;
 			const accessKey = process.env.MOMO_ACCESS_KEY;
-			const secretkey = process.env.MOMO_SECRET_KEY;
+			const secretKey = process.env.MOMO_SECRET_KEY;
 			const requestType = process.env.MOMO_REQUEST_TYPE;
 			const requestId = `${Date.now()}`;
 			const orderId = requestId;
@@ -49,7 +49,7 @@ const PaymentController = {
 
 			const rawSignature = `accessKey=${accessKey}&amount=${amount}&extraData=${extraData}&ipnUrl=${ipnUrl}&orderId=${orderId}&orderInfo=${orderInfo}&partnerCode=${partnerCode}&redirectUrl=${redirectUrl}&requestId=${requestId}&requestType=${requestType}`;
 
-			const signature = crypto.createHmac('sha256', secretkey).update(rawSignature).digest('hex');
+			const signature = crypto.createHmac('sha256', secretKey).update(rawSignature).digest('hex');
 
 			const requestBody = JSON.stringify({
 				partnerCode,
@@ -86,13 +86,13 @@ const PaymentController = {
 				response.on('end', () => {});
 			});
 			request.on('error', (error) => {
-				console.log(error);
+				console.error(error.message);
 				return res.status(500).json({ errors: [{ msg: 'Internal server error' }] });
 			});
 			request.write(requestBody);
 			request.end();
 		} catch (error) {
-			console.log(error);
+			console.error(error.message);
 			return res.status(500).json({ errors: [{ msg: 'Internal server error' }] });
 		}
 	},
@@ -102,56 +102,60 @@ const PaymentController = {
 		const errors = validationResult(req);
 		if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
 
-		const { _id } = req.user;
-		const { transId, message, amount, resultCode, cart } = req.body;
+		const { id: userId } = req.user;
+    const { transId, message, amount, resultCode, cart } = req.body;
 
-		if (resultCode && Number(resultCode) >= 0 && cart.length) {
-			try {
-				const paymentExist = await Payment.findOne({ transId });
+    if (resultCode && Number(resultCode) >= 0 && cart.length) {
+      try {
+        const paymentExist = await Payment.findOne({ transId });
 
-				if (paymentExist)
-					return res.status(409).json({ errors: [{ msg: 'This transaction already exists' }] });
+        if (paymentExist)
+          return res
+            .status(409)
+            .json({ errors: [{ msg: 'This transaction already exists' }] });
 
-				const payment = new Payment({
-					userId: new mongoose.Types.ObjectId(_id),
-					provider: 'MoMo',
-					transId,
-					message,
-					amount,
-				});
-				await payment.save();
-				if (Number(resultCode) === 0) {
-					const order = new Order({
-						userId: _id,
-						total: amount,
-						paymentId: payment._id,
-					});
+        const payment = new Payment({
+          userId: new mongoose.Types.ObjectId(userId),
+          provider: 'MoMo',
+          transId,
+          message,
+          amount,
+        });
+        await payment.save();
+        if (Number(resultCode) === 0) {
+          const order = new Order({
+            userId,
+            total: amount,
+            paymentId: payment._id,
+          });
 
-					await order.save();
+          await order.save();
 
-					cart.map(async (cartItem) => {
-						const orderItem = new OrderItem({
-							orderId: order._id,
-							userId: _id,
-							course: new mongoose.Types.ObjectId(cartItem.course._id),
-							price: cartItem.course.priceSale ? cartItem.course.priceSale : cartItem.course.price,
-						});
+          cart.map(async (cartItem) => {
+            const { course, id: cartItemId } = cartItem;
+            const { _id: courseId, priceSale, price } = course;
+            const orderItem = new OrderItem({
+              orderId: order._id,
+              userId,
+              course: new mongoose.Types.ObjectId(courseId),
+              price: priceSale ? priceSale : price,
+            });
 
-						await orderItem.save();
-						await CartItem.findByIdAndDelete(cartItem._id);
-						await Class.findOneAndUpdate(
-							{ course: cartItem.course._id },
-							{ $push: { students: new mongoose.Types.ObjectId(_id) } }
-						);
-					});
-				}
+            await orderItem.save();
+            await CartItem.findByIdAndDelete(cartItemId);
+            await Class.findOneAndUpdate(
+              { course: courseId },
+              { $push: { students: new mongoose.Types.ObjectId(userId) } }
+            );
+          });
+        }
 
-				return res.json({ msg: 'Payment was created successfully' });
-			} catch (error) {
-				console.log(error.message);
-				return res.status(500).json({ errors: [{ msg: 'Internal server error' }] });
-			}
-		}
+        return res.json({ msg: 'Payment was created successfully' });
+      } catch (error) {
+        console.error(error.message);
+        return res.status(500).json({ errors: [{ msg: 'Internal server error' }] });
+      }
+    }
 	},
 };
 

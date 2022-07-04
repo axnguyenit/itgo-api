@@ -6,35 +6,35 @@ const { validationResult } = require('express-validator');
 const ApplicationController = {
 	// [GET] /api/applications
 	async index(req, res) {
-		let _page = parseInt(req.query._page);
-		let _limit = parseInt(req.query._limit);
+		let page = parseInt(req.query.page);
+    let limit = parseInt(req.query.limit);
 
-		// get applications base on _page and _limit per _page
-		if (_page) {
-			_page = _page >= 0 ? _page : 1;
-			_limit = _limit || 1;
-			_limit = _limit >= 0 ? _limit : 1;
-			const skipDocs = (_page - 1) * _limit;
+    // get applications base on page and limit per page
+    if (page) {
+      page = page >= 0 ? page : 1;
+      limit = limit || 1;
+      limit = limit >= 0 ? limit : 1;
+      const skipDocs = (page - 1) * limit;
 
-			try {
-				const _totalRows = await Application.countDocuments();
-				const applications = await Application.find()
-					.sort({ createdAt: -1 })
-					.limit(_limit)
-					.skip(skipDocs)
-					.populate({
-						path: 'user',
-						model: 'User',
-						select: 'firstName lastName email avatar',
-					});
+      try {
+        const totalRows = await Application.countDocuments();
+        const applications = await Application.find()
+          .sort({ createdAt: -1 })
+          .limit(limit)
+          .skip(skipDocs)
+          .populate({
+            path: 'user',
+            model: 'User',
+            select: 'firstName lastName email avatar',
+          });
 
-				const pagination = { _page, _limit, _totalRows };
-				return res.json({ applications, pagination });
-			} catch (error) {
-				console.log(error);
-				return res.status(500).json({ errors: [{ msg: 'Internal server error' }] });
-			}
-		}
+        const pagination = { page, limit, totalRows };
+        return res.json({ applications, pagination });
+      } catch (error) {
+        console.error(error.message);
+        return res.status(500).json({ errors: [{ msg: 'Internal server error' }] });
+      }
+    }
 
 		// ----------------------------------------------------------------------
 
@@ -47,7 +47,7 @@ const ApplicationController = {
 			});
 			return res.json({ applications });
 		} catch (error) {
-			console.log(error);
+			console.error(error.message);
 			return res.status(500).json({ errors: [{ msg: 'Internal server error' }] });
 		}
 	},
@@ -71,11 +71,11 @@ const ApplicationController = {
 		const errors = validationResult(req);
 		if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
 
-		const { _id } = req.user;
+		const { id } = req.user;
 		const { position, cv } = req.body;
 
 		try {
-			const user = await Application.findOne({ user: _id });
+			const user = await Application.findOne({ user: id });
 			if (user) return res.status(409).json({ errors: [{ msg: 'Application already exist' }] });
 
 			if (!cv.startsWith('data:'))
@@ -87,13 +87,13 @@ const ApplicationController = {
 			});
 
 			const application = new Application({
-				user: _id,
+				user: id,
 				position,
 				cv: response.public_id,
 			});
 
 			await application.save();
-			await User.findByIdAndUpdate(_id, { isApply: true });
+			await User.findByIdAndUpdate(id, { isApply: true });
 
 			return res.json({ application, msg: 'Application was created successfully' });
 		} catch (error) {

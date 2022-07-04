@@ -12,65 +12,69 @@ const CartController = {
 
 		if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
 
-		const { _id } = req.user;
-		const { courseId } = req.body;
+		const { id: userId } = req.user;
+    const { courseId } = req.body;
 
-		try {
-			// User can not add a course is not exist
-			const course = await Course.findById(courseId);
-			// course not found
-			if (!course) return res.status(400).json({ errors: [{ msg: 'Course not found' }] });
+    try {
+      // User can not add a course is not exist
+      const course = await Course.findById(courseId);
+      // course not found
+      if (!course) return res.status(400).json({ errors: [{ msg: 'Course not found' }] });
 
-			const cart = await Cart.findOne({ userId: _id });
-			// cart not found
-			let newCart = null;
-			if (!cart) {
-				newCart = new Cart({ userId: _id });
-				await newCart.save();
-			}
+      const cart = await Cart.findOne({ userId });
+      // cart not found
+      let newCart = null;
+      if (!cart) {
+        newCart = new Cart({ userId });
+        await newCart.save();
+      }
 
-			// Instructor can not add their courses to cart
-			const isAuthor = course.instructor?.toString() === _id;
-			if (isAuthor)
-				return res.status(400).json({ errors: [{ msg: 'You can not add your course to cart' }] });
+      // Instructor can not add their courses to cart
+      const isAuthor = course.instructor?.toString() === userId;
+      if (isAuthor)
+        return res
+          .status(400)
+          .json({ errors: [{ msg: 'You can not add your course to cart' }] });
 
-			// User can not add a enrolled course
-			const orderItem = await OrderItem.findOne({
-				course: courseId,
-				userId: _id,
-			});
-			if (orderItem)
-				return res.status(409).json({ errors: [{ msg: 'You already bought this course' }] });
+      // User can not add a enrolled course
+      const orderItem = await OrderItem.findOne({
+        course: courseId,
+        userId,
+      });
+      if (orderItem)
+        return res
+          .status(409)
+          .json({ errors: [{ msg: 'You already bought this course' }] });
 
-			// User can not add a course is already exist
-			const cartItem = await CartItem.findOne({
-				course: courseId,
-				cartId: cart ? cart._id : newCart._id,
-			});
-			if (cartItem)
-				return res
-					.status(409)
-					.json({ errors: [{ msg: 'This course already exists in your cart' }] });
+      // User can not add a course is already exist
+      const cartItem = await CartItem.findOne({
+        course: courseId,
+        cartId: cart ? cart._id : newCart._id,
+      });
+      if (cartItem)
+        return res
+          .status(409)
+          .json({ errors: [{ msg: 'This course already exists in your cart' }] });
 
-			// Create new cart item
-			const newCartItem = new CartItem({
-				cartId: cart ? cart._id : newCart._id,
-				course: new mongoose.Types.ObjectId(courseId),
-			});
-			await newCartItem.save();
+      // Create new cart item
+      const newCartItem = new CartItem({
+        cartId: cart ? cart._id : newCart._id,
+        course: new mongoose.Types.ObjectId(courseId),
+      });
+      await newCartItem.save();
 
-			return res.json({ cartItem: newCartItem, msg: 'Add to cart successfully' });
-		} catch (error) {
-			console.log(error);
-			return res.status(500).json({ errors: [{ msg: 'Internal server error' }] });
-		}
+      return res.json({ cartItem: newCartItem, msg: 'Add to cart successfully' });
+    } catch (error) {
+      console.error(error.message);
+      return res.status(500).json({ errors: [{ msg: 'Internal server error' }] });
+    }
 	},
 
 	// [GET] /api/cart
 	async show(req, res) {
-		const { _id } = req.user;
+		const { id: userId } = req.user;
 		try {
-			const cart = await Cart.findOne({ userId: _id });
+			const cart = await Cart.findOne({ userId });
 
 			// Cart not found
 			if (!cart) return res.status(400).json({ errors: [{ msg: 'Cart not found' }] });
@@ -84,7 +88,7 @@ const CartController = {
 
 			return res.json({ cart, cartItems });
 		} catch (error) {
-			console.log(error);
+			console.error(error.message);
 			return res.status(500).json({ errors: [{ msg: 'Internal server error' }] });
 		}
 	},
@@ -99,7 +103,7 @@ const CartController = {
 			if (!cartItem) return res.status(400).json({ errors: [{ msg: 'Cart item not found' }] });
 			return res.json({ msg: 'Cart item was removed successfully' });
 		} catch (error) {
-			console.log(error);
+			console.error(error.message);
 			return res.status(500).json({ errors: [{ msg: 'Internal server error' }] });
 		}
 	},
