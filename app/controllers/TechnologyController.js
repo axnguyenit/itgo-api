@@ -5,41 +5,41 @@ const cloudinary = require('../../config/cloudinary');
 const TechnologyController = {
 	// [GET] /api/technologies
 	async index(req, res) {
-		let _page = parseInt(req.query._page);
-		let _limit = parseInt(req.query._limit);
+		let page = parseInt(req.query.page);
+    let limit = parseInt(req.query.limit);
 
-		// get technologies base on _page and _limit per _page
-		if (_page) {
-			_page = _page >= 0 ? _page : 1;
-			_limit = _limit || 1;
-			_limit = _limit >= 0 ? _limit : 1;
-			const skipDocs = (_page - 1) * _limit;
+    // get technologies base on page and limit per page
+    if (page) {
+      page = page >= 0 ? page : 1;
+      limit = limit || 1;
+      limit = limit >= 0 ? limit : 1;
+      const skipDocs = (page - 1) * limit;
 
-			try {
-				const _totalRows = await Technology.countDocuments();
-				const technologies = await Technology.find()
-					.sort({ createdAt: -1 })
-					.limit(_limit)
-					.skip(skipDocs);
+      try {
+        const totalRows = await Technology.countDocuments();
+        const technologies = await Technology.find()
+          .sort({ createdAt: -1 })
+          .limit(limit)
+          .skip(skipDocs);
 
-				const pagination = { _page, _limit, _totalRows };
-				return res.json({ technologies, pagination });
-			} catch (error) {
-				console.log(error);
-				return res.status(500).json({ errors: [{ msg: 'Internal server error' }] });
-			}
-		}
+        const pagination = { page, limit, totalRows };
+        return res.json({ technologies, pagination });
+      } catch (error) {
+        console.error(error.message);
+        return res.status(500).json({ errors: [{ msg: 'Internal server error' }] });
+      }
+    }
 
-		// ----------------------------------------------------------------------
+    // ----------------------------------------------------------------------
 
-		// get all technologies
-		try {
-			const technologies = await Technology.find().sort({ createdAt: -1 });
-			return res.json({ technologies });
-		} catch (error) {
-			console.log(error);
-			return res.status(500).json({ errors: [{ msg: 'Internal server error' }] });
-		}
+    // get all technologies
+    try {
+      const technologies = await Technology.find().sort({ createdAt: -1 });
+      return res.json({ technologies });
+    } catch (error) {
+      console.error(error.message);
+      return res.status(500).json({ errors: [{ msg: 'Internal server error' }] });
+    }
 	},
 
 	// [GET] /api/technologies/:id
@@ -51,7 +51,7 @@ const TechnologyController = {
 			if (!technology) return res.status(400).json({ errors: [{ msg: 'Technology not found' }] });
 			return res.json({ technology });
 		} catch (error) {
-			console.log(error);
+			console.error(error.message);
 			return res.status(500).json({ errors: [{ msg: 'Internal server error' }] });
 		}
 	},
@@ -122,7 +122,7 @@ const TechnologyController = {
 				return res.status(400).json({ errors: [{ msg: 'Technology item not found' }] });
 			return res.json({ msg: 'Technology was removed successfully' });
 		} catch (error) {
-			console.log(error);
+			console.error(error.message);
 			return res.status(500).json({ errors: [{ msg: 'Internal server error' }] });
 		}
 	},

@@ -8,7 +8,7 @@ const connect = async () => {
 		});
 		console.log('Connect Successfully!!!');
 	} catch (error) {
-		console.log(error);
+		console.error(error.message);
 	}
 };
 

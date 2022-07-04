@@ -13,52 +13,53 @@ const cloudinary = require('../../config/cloudinary');
 const CourseController = {
 	// [GET] /api/courses
 	async index(req, res) {
-		let _page = parseInt(req.query._page);
-		let _limit = parseInt(req.query._limit);
-		const { _tags, _instructor } = req.query;
-		let query = {};
+		let page = parseInt(req.query.page);
+    let limit = parseInt(req.query.limit);
+    const { tags, instructor } = req.query;
+    let query = {};
 
-		if (_instructor) {
-			try {
-				const instructor = await User.findById(_instructor);
+    if (instructor) {
+      try {
+        const _instructor = await User.findById(instructor);
 
-				// Instructor not found
-				if (!instructor) return res.status(400).json({ errors: [{ msg: 'Instructor not found' }] });
-				query = { instructor: _instructor };
-			} catch (error) {
-				console.log(error);
-				return res.status(500).json({ errors: [{ msg: 'Internal server error' }] });
-			}
-		}
+        // Instructor not found
+        if (!_instructor)
+          return res.status(400).json({ errors: [{ msg: 'Instructor not found' }] });
+        query = { instructor };
+      } catch (error) {
+        console.error(error.message);
+        return res.status(500).json({ errors: [{ msg: 'Internal server error' }] });
+      }
+    }
 
-		if (_tags) query = { ...query, tags: { $regex: _tags, $options: 'i' } };
+    if (tags) query = { ...query, tags: { $regex: tags, $options: 'i' } };
 
-		// get courses base on _page and _limit per _page
-		if (_page) {
-			_page = _page >= 0 ? _page : 1;
-			_limit = _limit || 1;
-			_limit = _limit >= 0 ? _limit : 1;
-			const skipDocs = (_page - 1) * _limit;
+    // get courses base on page and limit per page
+    if (page) {
+      page = page >= 0 ? page : 1;
+      limit = limit || 1;
+      limit = limit >= 0 ? limit : 1;
+      const skipDocs = (page - 1) * limit;
 
-			try {
-				const _totalRows = await Course.find(query).count();
-				const courses = await Course.find(query)
-					.sort({ createdAt: -1 })
-					.limit(_limit)
-					.skip(skipDocs)
-					.populate({
-						path: 'instructor',
-						model: 'User',
-						select: 'email firstName lastName',
-					});
+      try {
+        const totalRows = await Course.find(query).count();
+        const courses = await Course.find(query)
+          .sort({ createdAt: -1 })
+          .limit(limit)
+          .skip(skipDocs)
+          .populate({
+            path: 'instructor',
+            model: 'User',
+            select: 'email firstName lastName',
+          });
 
-				const pagination = { _page, _limit, _totalRows };
-				return res.json({ courses, pagination });
-			} catch (error) {
-				console.log(error);
-				return res.status(500).json({ errors: [{ msg: 'Internal server error' }] });
-			}
-		}
+        const pagination = { page, limit, totalRows };
+        return res.json({ courses, pagination });
+      } catch (error) {
+        console.error(error.message);
+        return res.status(500).json({ errors: [{ msg: 'Internal server error' }] });
+      }
+    }
 
 		// ----------------------------------------------------------------------
 
@@ -71,7 +72,7 @@ const CourseController = {
 			});
 			return res.json({ courses });
 		} catch (error) {
-			console.log(error);
+			console.error(error.message);
 			return res.status(500).json({ errors: [{ msg: 'Internal server error' }] });
 		}
 	},
@@ -81,7 +82,7 @@ const CourseController = {
 		const errors = validationResult(req);
 		if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
 
-		const instructor = req.body?.instructor || req.user?._id;
+		const instructor = req.body?.instructor || req.user?.id;
 		const {
 			name,
 			cover,
@@ -132,7 +133,7 @@ const CourseController = {
 
 			return res.json({ msg: 'Course was created successfully' });
 		} catch (error) {
-			console.log(error);
+			console.error(error.message);
 			return res.status(500).json({ errors: [{ msg: 'Internal server error' }] });
 		}
 	},
@@ -166,7 +167,7 @@ const CourseController = {
 
 			return res.json({ course });
 		} catch (error) {
-			console.log(error);
+			console.error(error.message);
 			return res.status(500).json({ errors: [{ msg: 'Internal server error 2' }] });
 		}
 	},
@@ -178,7 +179,7 @@ const CourseController = {
 		if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
 
 		const { id } = req.params;
-		const instructor = req.body?.instructor || req.user?._id;
+		const instructor = req.body?.instructor || req.user?.id;
 		const {
 			name,
 			price,
@@ -219,7 +220,7 @@ const CourseController = {
 
 			return res.json({ msg: 'Your course was updated successfully' });
 		} catch (error) {
-			console.log(error);
+			console.error(error.message);
 			return res.status(500).json({ errors: [{ msg: 'Internal server error' }] });
 		}
 	},
@@ -238,7 +239,7 @@ const CourseController = {
 
 			return res.json({ msg: 'Course was removed successfully' });
 		} catch (error) {
-			console.log(error);
+			console.error(error.message);
 			return res.status(500).json({ errors: [{ msg: 'Internal server error' }] });
 		}
 	},

@@ -6,27 +6,30 @@ const RoadmapDetail = require('../models/RoadmapDetail');
 const RoadmapController = {
 	// [GET] /api/roadmaps
 	async index(req, res) {
-		let _page = parseInt(req.query._page);
-		let _limit = parseInt(req.query._limit);
+		let page = parseInt(req.query.page);
+    let limit = parseInt(req.query.limit);
 
-		// get roadmaps base on _page and _limit per _page
-		if (_page) {
-			_page = _page >= 0 ? _page : 1;
-			_limit = _limit || 1;
-			_limit = _limit >= 0 ? _limit : 1;
-			const skipDocs = (_page - 1) * _limit;
+    // get roadmaps base on page and limit per page
+    if (page) {
+      page = page >= 0 ? page : 1;
+      limit = limit || 1;
+      limit = limit >= 0 ? limit : 1;
+      const skipDocs = (page - 1) * limit;
 
-			try {
-				const _totalRows = await Roadmap.find().count();
-				const roadmaps = await Roadmap.find().sort({ createdAt: -1 }).limit(_limit).skip(skipDocs);
+      try {
+        const totalRows = await Roadmap.find().count();
+        const roadmaps = await Roadmap.find()
+          .sort({ createdAt: -1 })
+          .limit(limit)
+          .skip(skipDocs);
 
-				const pagination = { _page, _limit, _totalRows };
-				return res.json({ roadmaps, pagination });
-			} catch (error) {
-				console.log(error);
-				return res.status(500).json({ errors: [{ msg: 'Internal server error' }] });
-			}
-		}
+        const pagination = { page, limit, totalRows };
+        return res.json({ roadmaps, pagination });
+      } catch (error) {
+        console.error(error.message);
+        return res.status(500).json({ errors: [{ msg: 'Internal server error' }] });
+      }
+    }
 
 		// get all roadmaps
 		try {
@@ -48,7 +51,10 @@ const RoadmapController = {
 
 			const roadmapDetails = await RoadmapDetail.find({ roadmapId: id });
 
-			return res.json({ roadmap: { ...roadmap.toObject(), technologies: roadmapDetails } });
+			const {_id, __v, ...rest} = roadmap.toObject()
+			rest.id = _id
+
+			return res.json({ roadmap: { ...rest, technologies: roadmapDetails } });
 		} catch (error) {
 			console.error(error);
 			return res.status(500).json({ errors: [{ msg: 'Internal server error' }] });
@@ -95,7 +101,7 @@ const RoadmapController = {
 			if (!roadmap) return res.status(400).json({ errors: [{ msg: 'Roadmap not found' }] });
 
 			technologies.map(async (_technology) => {
-				const { _id, technology, description, image, tag } = _technology;
+				const { id, technology, description, image, tag } = _technology;
 				let newImage = '';
 				if (image.startsWith('data:')) {
 					const response = await cloudinary.uploader.upload(image, {
@@ -105,7 +111,7 @@ const RoadmapController = {
 					newImage = response.public_id;
 				}
 
-				await RoadmapDetail.findByIdAndUpdate(_id, {
+				await RoadmapDetail.findByIdAndUpdate(id, {
 					technology,
 					description,
 					image: image.startsWith('data:') ? newImage : image,
@@ -129,7 +135,7 @@ const RoadmapController = {
 
 			return res.json({ msg: 'Roadmap was removed successfully' });
 		} catch (error) {
-			console.log(error);
+			console.error(error.message);
 			return res.status(500).json({ errors: [{ msg: 'Internal server error' }] });
 		}
 	},
