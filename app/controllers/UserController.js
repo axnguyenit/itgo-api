@@ -5,29 +5,29 @@ const User = require('../models/User');
 
 const UserController = {
 	async index(req, res) {
-		let _page = parseInt(req.query._page);
-		let _limit = parseInt(req.query._limit);
+		let page = parseInt(req.query.page);
+		let limit = parseInt(req.query.limit);
 		const query = { isAdmin: false };
 
-		// get users base on _page and _limit per _page
-		if (_page) {
-			_page = _page >= 0 ? _page : 1;
-			_limit = _limit || 1;
-			_limit = _limit >= 0 ? _limit : 1;
-			const skipDocs = (_page - 1) * _limit;
+		// get users base on page and limit per page
+		if (page) {
+			page = page >= 0 ? page : 1;
+			limit = limit || 1;
+			limit = limit >= 0 ? limit : 1;
+			const skipDocs = (page - 1) * limit;
 
 			try {
-				const _totalRows = await User.find(query).count();
+				const totalRows = await User.find(query).count();
 				const users = await User.find(query)
 					.sort({ createdAt: -1 })
-					.limit(_limit)
+					.limit(limit)
 					.skip(skipDocs)
 					.select('firstName lastName email isInstructor emailVerified avatar position isBanned');
 
-				const pagination = { _page, _limit, _totalRows };
+				const pagination = { page, limit, totalRows };
 				return res.json({ users, pagination });
 			} catch (error) {
-				console.log(error);
+				console.error(error.message);
 				return res.status(500).json({ errors: [{ msg: 'Internal server error' }] });
 			}
 		}
@@ -41,16 +41,16 @@ const UserController = {
 				.select('firstName lastName email isInstructor emailVerified avatar position isBanned');
 			return res.json({ users });
 		} catch (error) {
-			console.log(error);
+			console.error(error.message);
 			return res.status(500).json({ errors: [{ msg: 'Internal server error' }] });
 		}
 	},
 
 	// [GET] /api/users/my-account
 	async myAccount(req, res) {
-		const { _id } = req.user;
+		const { id } = req.user;
 		try {
-			const user = await User.findById(_id).select(
+			const user = await User.findById(id).select(
 				'firstName lastName email isAdmin isInstructor emailVerified avatar address phoneNumber region isApply'
 			);
 
@@ -59,7 +59,7 @@ const UserController = {
 
 			return res.json({ user });
 		} catch (error) {
-			console.log(error);
+			console.error(error.message);
 			return res.status(500).json({ errors: [{ msg: 'Internal server error' }] });
 		}
 	},
@@ -113,19 +113,19 @@ const UserController = {
 			});
 			return res.json({ msg: 'Account was updated successfully' });
 		} catch (error) {
-			console.log(error);
+			console.error(error.message);
 			return res.status(500).json({ errors: [{ msg: 'Internal server error' }] });
 		}
 	},
 
 	// [POST] /api/users/change-password
 	async changePassword(req, res) {
-		const { _id } = req.user;
+		const { id } = req.user;
 		const { oldPassword, newPassword, confirmNewPassword } = req.body;
 
 		try {
-			const user = await User.findById(_id);
-			// Compare hased password with user password to see if they are valid
+			const user = await User.findById(id);
+			// Compare hashed password with user password to see if they are valid
 			const isMatch = await bcrypt.compareSync(oldPassword, user.password);
 			if (!isMatch) return res.status(401).json({ errors: [{ msg: 'Old password is invalid' }] });
 			if (newPassword !== confirmNewPassword)
@@ -135,55 +135,59 @@ const UserController = {
 			const salt = await bcrypt.genSalt(10);
 			const hashedPassword = await bcrypt.hash(newPassword, salt);
 
-			await User.findByIdAndUpdate(_id, { password: hashedPassword });
+			await User.findByIdAndUpdate(id, { password: hashedPassword });
 			return res.json({ msg: 'Password was updated successfully' });
 		} catch (error) {
-			console.log(error);
+			console.error(error.message);
 			return res.status(500).json({ errors: [{ msg: 'Internal server error' }] });
 		}
 	},
 
 	// [GET] /api/instructors
 	async getAllInstructors(req, res) {
-		let _page = parseInt(req.query._page);
-		let _limit = parseInt(req.query._limit);
+		let page = parseInt(req.query.page);
+    let limit = parseInt(req.query.limit);
 
-		const query = { isInstructor: true };
+    const query = { isInstructor: true };
 
-		// get instructor base on _page and _limit per _page
-		if (_page) {
-			_page = _page >= 0 ? _page : 1;
-			_limit = _limit || 1;
-			_limit = _limit >= 0 ? _limit : 1;
-			const skipDocs = (_page - 1) * _limit;
+    // get instructor base on page and limit per page
+    if (page) {
+      page = page >= 0 ? page : 1;
+      limit = limit || 1;
+      limit = limit >= 0 ? limit : 1;
+      const skipDocs = (page - 1) * limit;
 
-			try {
-				const _totalRows = await User.find(query).count();
-				const instructors = await User.find(query)
-					.sort({ createdAt: -1 })
-					.limit(_limit)
-					.skip(skipDocs)
-					.select('firstName lastName avatar position email isInstructor emailVerified isBanned');
+      try {
+        const totalRows = await User.find(query).count();
+        const instructors = await User.find(query)
+          .sort({ createdAt: -1 })
+          .limit(limit)
+          .skip(skipDocs)
+          .select(
+            'firstName lastName avatar position email isInstructor emailVerified isBanned'
+          );
 
-				const pagination = { _page, _limit, _totalRows };
+        const pagination = { page, limit, totalRows };
 
-				return res.json({ instructors, pagination });
-			} catch (error) {
-				console.log(error);
-				return res.status(500).json({ errors: [{ msg: 'Internal server error' }] });
-			}
-		}
+        return res.json({ instructors, pagination });
+      } catch (error) {
+        console.error(error.message);
+        return res.status(500).json({ errors: [{ msg: 'Internal server error' }] });
+      }
+    }
 
-		// get all instructors
-		try {
-			const instructors = await User.find(query)
-				.sort({ createdAt: -1 })
-				.select('firstName lastName avatar position email isInstructor emailVerified isBanned');
-			return res.json({ instructors });
-		} catch (error) {
-			console.log(error);
-			return res.status(500).json({ errors: [{ msg: 'Internal server error' }] });
-		}
+    // get all instructors
+    try {
+      const instructors = await User.find(query)
+        .sort({ createdAt: -1 })
+        .select(
+          'firstName lastName avatar position email isInstructor emailVerified isBanned'
+        );
+      return res.json({ instructors });
+    } catch (error) {
+      console.error(error.message);
+      return res.status(500).json({ errors: [{ msg: 'Internal server error' }] });
+    }
 	},
 
 	async banUser(req, res) {},

@@ -83,70 +83,72 @@ const AuthController = {
 		if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
 
 		try {
-			const { email, password } = req.body;
-			const user = await User.findOne({ email: email });
+      const { email, password } = req.body;
+      const user = await User.findOne({ email: email });
 
-			// user not found
-			if (!user) return res.status(400).json({ errors: [{ msg: 'User do not exist' }] });
+      // user not found
+      if (!user) return res.status(400).json({ errors: [{ msg: 'User do not exist' }] });
 
-			// Compare hased password with user password to see if they are valid
-			const isMatch = await bcrypt.compareSync(password, user.password);
+      // Compare hased password with user password to see if they are valid
+      const isMatch = await bcrypt.compareSync(password, user.password);
 
-			if (!isMatch)
-				return res.status(401).json({ errors: [{ msg: 'Email or password is invalid' }] });
+      if (!isMatch)
+        return res
+          .status(401)
+          .json({ errors: [{ msg: 'Email or password is invalid' }] });
 
-			const {
-				_id,
-				firstName,
-				lastName,
-				isAdmin,
-				isInstructor,
-				emailVerified,
-				avatar,
-				address,
-				phoneNumber,
-				region,
-				isApply,
-			} = user;
+      const {
+        _id,
+        firstName,
+        lastName,
+        isAdmin,
+        isInstructor,
+        emailVerified,
+        avatar,
+        address,
+        phoneNumber,
+        region,
+        isApply,
+      } = user;
 
-			// Send JWT access token
-			const accessToken = await JWT.sign(
-				{ _id, firstName, lastName, email, isAdmin, isInstructor },
-				process.env.ACCESS_TOKEN_SECRET,
-				{ expiresIn: '3h' }
-			);
+      // Send JWT access token
+      const accessToken = await JWT.sign(
+        { id: _id, firstName, lastName, email, isAdmin, isInstructor },
+        process.env.ACCESS_TOKEN_SECRET,
+        { expiresIn: '3h' }
+      );
 
-			// Refresh token
-			const refreshToken = await JWT.sign(
-				{ _id, firstName, lastName, email },
-				process.env.REFRESH_TOKEN_SECRET,
-				{
-					expiresIn: '7d',
-				}
-			);
+      // Refresh token
+      const refreshToken = await JWT.sign(
+        { id: _id, firstName, lastName, email },
+        process.env.REFRESH_TOKEN_SECRET,
+        {
+          expiresIn: '7d',
+        }
+      );
 
-			return res.json({
-				user: {
-					_id,
-					firstName,
-					lastName,
-					isAdmin,
-					email,
-					avatar,
-					region,
-					address,
-					isApply,
-					phoneNumber,
-					isInstructor,
-					emailVerified,
-				},
-				accessToken,
-				refreshToken,
-			});
-		} catch (error) {
-			console.error(error);
-			return res.status(500).json({ errors: [{ msg: 'Internal server error' }] });
-		}
+      return res.json({
+        user: {
+          id: _id,
+          firstName,
+          lastName,
+          isAdmin,
+          email,
+          avatar,
+          region,
+          address,
+          isApply,
+          phoneNumber,
+          isInstructor,
+          emailVerified,
+        },
+        accessToken,
+        refreshToken,
+      });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ errors: [{ msg: 'Internal server error' }] });
+    }
 	},
 
 	// [POST] /api/auth/verify
@@ -324,7 +326,7 @@ const AuthController = {
 			// Send JWT access token
 			const accessToken = await JWT.sign(
 				{
-					_id,
+					id: _id,
 					firstName,
 					lastName,
 					email,

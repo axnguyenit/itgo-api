@@ -13,7 +13,7 @@ const ClassController = {
 
 			return res.json({ students: classCourse?.students || [] });
 		} catch (error) {
-			console.log(error.message);
+			console.error(error.message);
 			return res.status(500).json({ errors: [{ msg: 'Internal server error' }] });
 		}
 	},
