@@ -13,12 +13,11 @@ router.put(
 	userController.updateAccount
 );
 router.post(
-	'/change-password',
-	verifyAccessToken,
-	validator.changePassword,
-	userController.changePassword
+  '/change-password',
+  verifyAccessToken,
+  validator.changePassword,
+  userController.changePassword
 );
-router.put('/ban-user/:id', verifyAccessToken, authorization.isAdmin, userController.banUser);
 router.get('/my-account', verifyAccessToken, userController.myAccount);
 router.get('/user/:id', verifyAccessToken, userController.show);
 router.get('/', verifyAccessToken, authorization.isAdmin, userController.index);

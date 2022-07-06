@@ -11,7 +11,7 @@ const ClassController = {
 				select: 'firstName lastName email isInstructor avatar position isBanned',
 			});
 
-			return res.json({ students: classCourse?.students || [] });
+			return res.json({ results: classCourse?.students || [] });
 		} catch (error) {
 			console.error(error.message);
 			return res.status(500).json({ errors: [{ msg: 'Internal server error' }] });
