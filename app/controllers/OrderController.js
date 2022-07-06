@@ -39,32 +39,32 @@ const OrderController = {
           });
 
         const pagination = { page, limit, totalRows };
-        return res.json({ orders, pagination });
+        return res.json({ results: orders, pagination });
       } catch (error) {
         console.error(error.message);
         return res.status(500).json({ errors: [{ msg: 'Internal server error' }] });
       }
     }
 
-		// ----------------------------------------------------------------------
+    // ----------------------------------------------------------------------
 
-		// get all orders
-		try {
-			const orders = await OrderItem.find(query).populate({
-				path: 'course',
-				model: 'Course',
-				select: 'name cover instructor',
-				populate: {
-					path: 'instructor',
-					model: 'User',
-					select: 'firstName lastName',
-				},
-			});
-			return res.json({ orders });
-		} catch (error) {
-			console.error(error.message);
-			return res.status(500).json({ errors: [{ msg: 'Internal server error' }] });
-		}
+    // get all orders
+    try {
+      const orders = await OrderItem.find(query).populate({
+        path: 'course',
+        model: 'Course',
+        select: 'name cover instructor',
+        populate: {
+          path: 'instructor',
+          model: 'User',
+          select: 'firstName lastName',
+        },
+      });
+      return res.json({ results: orders });
+    } catch (error) {
+      console.error(error.message);
+      return res.status(500).json({ errors: [{ msg: 'Internal server error' }] });
+    }
 	},
 };
 
