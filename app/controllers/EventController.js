@@ -10,7 +10,7 @@ const EventController = {
 
 		try {
 			const events = await Event.find({ instructor: id });
-			return res.json({ events });
+			return res.json({ results: events });
 		} catch (error) {
 			console.error(error.message);
 			return res.status(500).json({ errors: [{ msg: 'Internal server error' }] });
@@ -28,7 +28,7 @@ const EventController = {
 
       const events = await Event.find({ course: id });
 
-      return res.json({ events });
+      return res.json({ results: events });
     } catch (error) {
       console.error(error.message);
       return res.status(500).json({ errors: [{ msg: 'Internal server error' }] });
@@ -116,7 +116,7 @@ const EventController = {
 
 			await event.save();
 
-			return res.json({ event, msg: 'Event was created successfully' });
+			return res.json({ msg: 'Event was created successfully' });
 		} catch (error) {
 			console.error(error.message);
 			return res.status(500).json({ errors: [{ msg: 'Internal server error' }] });
@@ -157,7 +157,7 @@ const EventController = {
 
 		try {
 			const event = await Event.findByIdAndDelete(id);
-			return res.json({ event, msg: 'Event was removed successfully' });
+			return res.json({ msg: 'Event was removed successfully' });
 		} catch (error) {
 			console.error(error.message);
 			return res.status(500).json({ errors: [{ msg: 'Internal server error' }] });

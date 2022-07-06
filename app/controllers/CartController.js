@@ -86,7 +86,7 @@ const CartController = {
 				select: 'name cover price priceSale',
 			});
 
-			return res.json({ cart, cartItems });
+			return res.json({ results: cartItems });
 		} catch (error) {
 			console.error(error.message);
 			return res.status(500).json({ errors: [{ msg: 'Internal server error' }] });
